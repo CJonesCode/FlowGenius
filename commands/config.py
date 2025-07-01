@@ -1,10 +1,12 @@
 """
 Config command for managing BugIt configuration.
-Handles viewing, setting, importing, and exporting configuration.
+API keys are saved to .env file, preferences to .bugitrc.
+Designed for future multi-provider support.
 """
 
 import typer
 import json
+import os
 from typing import Optional
 from pathlib import Path
 from core import config as config_core
@@ -13,55 +15,83 @@ from core import config as config_core
 def config(
     get: Optional[str] = typer.Option(None, "--get", help="Get a config value"),
     set_key: Optional[str] = typer.Option(None, "--set", help="Config key to set"),
-    value: Optional[str] = typer.Argument(None, help="Value to set (when using --set)"),
-    import_file: Optional[Path] = typer.Option(None, "--import", help="Import config from JSON file"),
-    export_file: Optional[Path] = typer.Option(None, "--export", help="Export config to JSON file")
+    set_api_key: Optional[str] = typer.Option(None, "--set-api-key", help="Set API key for provider (openai, anthropic, google)"),
+    import_file: Optional[Path] = typer.Option(None, "--import", help="Import preferences from JSON file"),
+    export_file: Optional[Path] = typer.Option(None, "--export", help="Export preferences to JSON file"),
+    value: Optional[str] = typer.Argument(None, help="Value to set (for --set or --set-api-key)")
 ):
     """
     View or modify BugIt configuration.
     
-    Examples:
-        bugit config                    # Show current config
-        bugit config --get model        # Get specific value
-        bugit config --set model gpt-4  # Set specific value
-        bugit config --export config.json  # Export to file
-        bugit config --import config.json  # Import from file
+    Use --get to retrieve values, --set for preferences, --set-api-key for API keys.
+    API keys are saved to .env file and loaded automatically.
     """
     try:
-        # Import config from file
+        # Set API key persistently to .env file
+        if set_api_key:
+            if not value:
+                typer.echo("API key value is required when using --set-api-key", err=True)
+                typer.echo("Example: bugit config --set-api-key openai sk-your-key", err=True)
+                raise typer.Exit(1)
+            
+            try:
+                config_core.set_api_key(set_api_key, value)
+                typer.echo(f"✅ API key for {set_api_key} set successfully")
+                typer.echo(f"💾 Saved to .env file for future sessions")
+            except config_core.ConfigError as e:
+                typer.echo(f"Error: {e}", err=True)
+                raise typer.Exit(1)
+            return
+        
+        # Import preferences from file
         if import_file:
             if not import_file.exists():
                 typer.echo(f"File not found: {import_file}", err=True)
                 raise typer.Exit(1)
             
             with open(import_file, 'r') as f:
-                new_config = json.load(f)
+                new_preferences = json.load(f)
             
-            # Validate config
-            config_core.save_config(new_config)
-            typer.echo(f"Configuration imported from {import_file}")
+            # Save preferences (automatically excludes API keys)
+            config_core.save_preferences(new_preferences)
+            typer.echo(f"Preferences imported from {import_file}")
             return
         
         # Load current config
         current_config = config_core.load_config()
         
-        # Export config to file
+        # Export preferences to file (excluding API keys)
         if export_file:
+            safe_preferences = {
+                k: v for k, v in current_config.items() 
+                if not k.endswith('_api_key')
+            }
             with open(export_file, 'w') as f:
-                json.dump(current_config, f, indent=2)
-            typer.echo(f"Configuration exported to {export_file}")
+                json.dump(safe_preferences, f, indent=2)
+            typer.echo(f"Preferences exported to {export_file}")
             return
         
         # Get specific config value
         if get:
+            # Handle legacy 'api_key' request
+            if get == 'api_key':
+                get = 'openai_api_key'
+                typer.echo("[INFO] 'api_key' is now 'openai_api_key' for clarity")
+            
             if get in current_config:
-                value = current_config[get]
-                if get == 'api_key' and value:
-                    # Mask API key for security
-                    masked = value[:8] + "*" * (len(value) - 8) if len(value) > 8 else "***"
-                    typer.echo(f"{get}: {masked}")
+                value_result = current_config[get]
+                if get.endswith('_api_key'):
+                    if value_result:
+                        # Mask API key for security
+                        masked = value_result[:8] + "*" * (len(value_result) - 8) if len(value_result) > 8 else "***"
+                        source = "(.env file)" if Path('.env').exists() else "(environment)"
+                        typer.echo(f"{get}: {masked} {source}")
+                    else:
+                        provider = get.replace('_api_key', '')
+                        typer.echo(f"{get}: Not set")
+                        typer.echo(f"Set with: bugit config --set-api-key {provider} <your-key>")
                 else:
-                    typer.echo(f"{get}: {value}")
+                    typer.echo(f"{get}: {value_result}")
             else:
                 typer.echo(f"Config key '{get}' not found.")
             return
@@ -72,20 +102,61 @@ def config(
                 typer.echo("Value is required when using --set", err=True)
                 raise typer.Exit(1)
             
-            config_core.set_config_value(set_key, value)
-            typer.echo(f"Set {set_key}: {value}")
+            # Handle legacy 'api_key' setting attempt
+            if set_key == 'api_key':
+                typer.echo("Error: Use '--set-api-key openai <key>' instead of '--set api_key'", err=True)
+                typer.echo("Example: bugit config --set-api-key openai sk-your-key", err=True)
+                raise typer.Exit(1)
+            
+            try:
+                config_core.set_preference(set_key, value)
+                typer.echo(f"✅ Set {set_key}: {value}")
+            except config_core.ConfigError as e:
+                typer.echo(f"Error: {e}", err=True)
+                raise typer.Exit(1)
             return
         
         # Show all config (default behavior)
         typer.echo("Current configuration:")
+        typer.echo()
+        
+        # Show OpenAI API key status
+        if config_core.check_openai_api_key():
+            api_key = current_config.get('openai_api_key', '')
+            masked = api_key[:8] + "*" * (len(api_key) - 8) if len(api_key) > 8 else "***"
+            source = "(.env file)" if Path('.env').exists() else "(environment)"
+            typer.echo(f"  🔐 openai_api_key: {masked} {source}")
+        else:
+            typer.echo(f"  🔐 openai_api_key: Not set")
+            typer.echo(f"     Set with: bugit config --set-api-key openai <your-key>")
+        
+        # Future: Show other provider API keys here
+        # typer.echo(f"  🔐 anthropic_api_key: {masked if anthropic_key else 'Not set'}")
+        # typer.echo(f"  🔐 google_api_key: {masked if google_key else 'Not set'}")
+        
+        typer.echo()
+        typer.echo("Preferences:")
+        
+        # Show preferences
         for key, val in current_config.items():
-            if key == 'api_key' and val:
-                # Mask API key for security
-                masked = val[:8] + "*" * (len(val) - 8) if len(val) > 8 else "***"
-                typer.echo(f"  {key}: {masked}")
-            else:
-                typer.echo(f"  {key}: {val}")
+            if not key.endswith('_api_key'):
+                source = ""
+                if key == 'model' and 'BUGIT_MODEL' in os.environ:
+                    source = " (from environment)"
+                else:
+                    source = " (from .bugitrc)" if Path('.bugitrc').exists() else " (default)"
+                typer.echo(f"  ⚙️  {key}: {val}{source}")
+        
+        # Show helpful hints
+        typer.echo()
+        typer.echo("💡 Helpful commands:")
+        typer.echo("   bugit config --set-api-key openai <key>   # Set OpenAI API key")
+        typer.echo("   bugit config --set model gpt-4            # Set model preference")
+        typer.echo("   bugit config --export config.json        # Export preferences")
                 
+    except typer.Exit:
+        # Re-raise typer.Exit to preserve exit codes
+        raise
     except Exception as e:
         typer.echo(f"Error managing config: {e}", err=True)
         raise typer.Exit(1) 

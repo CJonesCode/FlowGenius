@@ -7,7 +7,8 @@ Provides commands for creating, listing, showing, editing, and deleting bug repo
 """
 
 import typer
-from commands import new, list, show, delete, edit, config
+from commands import new, list, show, delete, edit
+from commands import config as config_cmd
 
 app = typer.Typer(
     name="bugit",
@@ -21,7 +22,7 @@ app.command("list")(list.list_issues)
 app.command("show")(show.show)
 app.command("delete")(delete.delete)
 app.command("edit")(edit.edit)
-app.command("config")(config.config)
+app.command("config")(config_cmd.config)
 
 if __name__ == "__main__":
     app() 

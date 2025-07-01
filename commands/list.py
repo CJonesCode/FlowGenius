@@ -18,10 +18,7 @@ def list_issues(
     """
     List all bug reports with optional filtering.
     
-    Args:
-        tag: Filter by specific tag
-        severity: Filter by severity level  
-        json_output: Output in JSON format instead of table
+    Use --tag and --severity to filter results. Use --json for machine-readable output.
     """
     try:
         issues = storage.list_issues()
