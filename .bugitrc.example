@@ -1,0 +1,5 @@
+{
+  "api_key": "sk-your-openai-api-key-here",
+  "model": "gpt-4",
+  "enum_mode": "auto"
+} 

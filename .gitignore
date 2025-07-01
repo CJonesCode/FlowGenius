@@ -179,3 +179,26 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# ===================================
+# BugIt CLI Specific
+# ===================================
+
+# BugIt Configuration (contains API keys - NEVER commit!)
+.bugitrc
+
+# BugIt Runtime Directory (issue storage)
+# Note: In production use, users may want to track .bugit/ in their project repos
+# For development/testing, we ignore it to avoid committing test data
+.bugit/
+
+# BugIt temporary files
+*.bugit.tmp
+*.bugit.bak
+
+# BugIt logs (when logging is implemented)
+bugit.log
+bugit-*.log
+
+# BugIt backup files (when backup feature is implemented)
+.bugit-backup/
