@@ -6,14 +6,24 @@ Supports both UUID and index-based selection.
 import typer
 import json
 from core import storage
+from rich.console import Console
+from rich.panel import Panel
+from rich.syntax import Syntax
 
 
-def show(id_or_index: str):
+def show(
+    id_or_index: str,
+    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format")
+):
     """
     Show detailed information about a specific bug report.
     
     Args:
         id_or_index: Either the UUID or index (from list command) of the issue
+        pretty_output: Show human-readable output instead of JSON
+    
+    Default output is JSON for easy scripting and automation.
+    Use --pretty for human-readable output with syntax highlighting.
     """
     try:
         # Try to get issue by ID first, then by index
@@ -25,15 +35,65 @@ def show(id_or_index: str):
             if 0 <= index < len(issues):
                 issue = issues[index]
             else:
-                typer.echo(f"Invalid index: {id_or_index}. Use 'bugit list' to see available issues.", err=True)
+                error_msg = f"Invalid index: {id_or_index}. Use 'bugit list' to see available issues."
+                if pretty_output:
+                    typer.echo(error_msg, err=True)
+                else:
+                    output = {
+                        "success": False,
+                        "error": error_msg
+                    }
+                    typer.echo(json.dumps(output, indent=2))
                 raise typer.Exit(1)
         else:
             # UUID-based selection
             issue = storage.load_issue(id_or_index)
         
         # Display issue details
-        typer.echo(json.dumps(issue, indent=2))
+        if pretty_output:
+            # Human-readable output with Rich formatting
+            console = Console()
+            
+            # Create a nice panel with issue details
+            title = f"{issue.get('title', 'No title')} (ID: {issue.get('id', 'N/A')})"
+            
+            content_lines = []
+            content_lines.append(f"**Severity:** {issue.get('severity', 'N/A')}")
+            content_lines.append(f"**Type:** {issue.get('type', 'N/A')}")
+            
+            tags = issue.get('tags', [])
+            if tags:
+                content_lines.append(f"**Tags:** {', '.join(tags)}")
+            else:
+                content_lines.append("**Tags:** (none)")
+                
+            content_lines.append(f"**Created:** {issue.get('created_at', 'N/A')}")
+            content_lines.append("")
+            content_lines.append("**Description:**")
+            content_lines.append(issue.get('description', 'No description'))
+            
+            panel = Panel(
+                "\n".join(content_lines),
+                title=title,
+                border_style="blue",
+                padding=(1, 2)
+            )
+            console.print(panel)
+        else:
+            # JSON output (default)
+            typer.echo(json.dumps(issue, indent=2))
         
+    except typer.Exit:
+        # Re-raise typer.Exit to preserve exit codes
+        raise
     except Exception as e:
-        typer.echo(f"Error showing issue: {e}", err=True)
+        error_msg = f"Error showing issue: {e}"
+        if pretty_output:
+            typer.echo(error_msg, err=True)
+        else:
+            output = {
+                "success": False,
+                "error": error_msg
+            }
+            typer.echo(json.dumps(output, indent=2))
         raise typer.Exit(1) 

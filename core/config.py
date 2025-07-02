@@ -88,7 +88,7 @@ def save_preferences(preferences: Dict[str, Any], filepath: str = '.bugitrc') ->
     try:
         with open(filepath, 'w') as f:
             json.dump(safe_preferences, f, indent=2)
-        print(f"[STUB] Preferences saved to {filepath}")
+        # print(f"[STUB] Preferences saved to {filepath}")
     except Exception as e:
         raise ConfigError(f"Failed to save preferences: {e}")
 

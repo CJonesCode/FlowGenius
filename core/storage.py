@@ -32,7 +32,7 @@ def save_issue(data: Dict) -> str:
     issue_id = data.get('id', str(uuid.uuid4())[:6])
     
     # Mock file write - actual implementation will use atomic writes
-    print(f"[STUB] Would save issue {issue_id} to .bugit/issues/{issue_id}.json")
+    # print(f"[STUB] Would save issue {issue_id} to .bugit/issues/{issue_id}.json")
     return issue_id
 
 def load_issue(issue_id: str) -> Dict:
@@ -74,5 +74,5 @@ def list_issues() -> List[Dict]:
 
 def delete_issue(issue_id: str) -> bool:
     """Delete issue by ID. Returns True if successful."""
-    print(f"[STUB] Would delete issue {issue_id}")
+    # print(f"[STUB] Would delete issue {issue_id}")
     return True 

@@ -1,0 +1,1 @@
+[STUB] Would save issue 3cc612 to .bugit/issues/3cc612.json

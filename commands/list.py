@@ -13,12 +13,13 @@ from rich.table import Table
 def list_issues(
     tag: Optional[str] = typer.Option(None, "--tag", help="Filter by tag"),
     severity: Optional[str] = typer.Option(None, "--severity", help="Filter by severity"),
-    json_output: bool = typer.Option(False, "--json", help="Output in JSON format")
+    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable table format")
 ):
     """
     List all bug reports with optional filtering.
     
-    Use --tag and --severity to filter results. Use --json for machine-readable output.
+    Use --tag and --severity to filter results. Use --pretty for human-readable table output.
+    Default output is JSON for easy scripting and automation.
     """
     try:
         issues = storage.list_issues()
@@ -29,11 +30,11 @@ def list_issues(
         if severity:
             issues = [i for i in issues if i.get('severity') == severity.lower()]
             
-        if json_output:
+        if pretty_output:
+            _display_table(issues)
+        else:
             import json
             typer.echo(json.dumps(issues, indent=2))
-        else:
-            _display_table(issues)
             
     except Exception as e:
         typer.echo(f"Error listing issues: {e}", err=True)
