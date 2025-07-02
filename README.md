@@ -1,6 +1,6 @@
 # BugIt CLI
 
-**Status: Phase 2 Complete ✅** - Production-ready CLI with real LangGraph integration and automation-friendly output
+**Status: Phase 3 Complete ✅** - Production-ready CLI with real file operations, atomic writes, and cross-platform compatibility
 
 AI-powered bug report management tool for developers.
 
@@ -8,7 +8,7 @@ AI-powered bug report management tool for developers.
 
 BugIt is a CLI-first tool that enables developers to quickly capture unstructured bug reports without interrupting their development flow. It integrates with LangGraph AI backend to transform freeform bug descriptions into structured JSON files with metadata such as title, severity, and tags.
 
-**Current Implementation:** All 6 core commands are functional with **real LangGraph integration** using OpenAI API. The CLI offers JSON output by default (perfect for automation) with optional `--pretty` flag for human-readable formatting. Features include retry logic, structured error handling, and professional clean output.
+**Current Implementation:** All 6 core commands are functional with **real LangGraph integration** using OpenAI API and **production file operations** with atomic writes. The CLI offers JSON output by default (perfect for automation) with optional `--pretty` flag for human-readable formatting. Features include retry logic, structured error handling, cross-platform file locking, and professional clean output.
 
 ## Features
 
@@ -22,13 +22,18 @@ BugIt is a CLI-first tool that enables developers to quickly capture unstructure
 
 ### Production Capabilities ✅
 - **Real AI Processing**: OpenAI API integration via LangGraph framework
+- **Atomic File Operations**: Write-then-rename pattern prevents partial writes
+- **Cross-Platform File Locking**: Concurrent access safety (full on Unix, simplified on Windows)
+- **Real Filesystem Persistence**: Issues stored as individual JSON files
 - **JSON-First Output**: Default JSON format perfect for automation and scripting
 - **Pretty Human Output**: Clean, professional formatting with `--pretty` flag
+- **Dynamic Index Management**: Runtime index generation with proper sorting
 - **Retry Logic**: Configurable retry attempts (default: 3) with error recovery
 - **Secure Configuration**: API keys stored in `.env` file (git-ignored)
 - **Multi-Provider Ready**: Architecture supports OpenAI, Anthropic, and Google APIs
-- **Comprehensive Testing**: 22/22 tests passing with real AI integration coverage
+- **Comprehensive Testing**: 22/22 tests passing with real AI integration and production storage
 - **Production Error Handling**: Structured error responses for automation
+- **Data Safety**: Optional backup on delete, corrupted file handling
 
 ## Setup
 
@@ -252,7 +257,7 @@ BugIt/
 │   ├── delete.py         # Delete issues
 │   └── config.py         # Configuration management
 ├── core/                  # Core business logic
-│   ├── storage.py         # File system operations
+│   ├── storage.py         # Production file operations with atomic writes
 │   ├── schema.py          # Data validation and defaults
 │   ├── model.py           # Real LangGraph integration
 │   └── config.py          # Configuration management
@@ -261,7 +266,8 @@ BugIt/
 │   ├── test_basic.py      # Core functionality tests (9/9)
 │   └── test_json_output.py # JSON output and automation tests (13/13)
 ├── .bugit/               # Runtime directory (auto-created)
-│   └── issues/           # Issue storage
+│   ├── issues/           # Issue storage (JSON files)
+│   └── backups/          # Optional backup storage
 ├── .env                  # API keys (git-ignored, auto-created)
 ├── .bugitrc              # User preferences
 └── requirements.txt      # Dependencies
@@ -292,36 +298,45 @@ BugIt/
 - **Comprehensive error handling** with structured responses
 - **Expanded testing** with 22/22 tests passing (real AI integration coverage)
 
+### ✅ Phase 3: Production File Operations - COMPLETE
+- **Atomic file operations** with write-then-rename pattern
+- **Cross-platform file locking** for concurrent access safety (full on Unix, simplified on Windows)
+- **Real filesystem persistence** with individual JSON files replacing all mock storage
+- **Dynamic index management** with runtime generation and proper sorting
+- **Production error handling** with StorageError hierarchy and structured responses
+- **Data safety features**: Optional backup on delete, corrupted file handling
+- **Storage statistics** and monitoring capabilities for debugging
+- **Enhanced command integration** using new storage functions
+
 ### What Works Right Now:
 - ✅ **Complete CLI interface** with dual output modes (JSON/pretty)
 - ✅ **Real AI processing** with OpenAI API integration
+- ✅ **Production file operations** with atomic writes and file locking
 - ✅ **Automation-ready** JSON output for scripting and CI/CD
 - ✅ **Human-friendly** pretty output for interactive use
+- ✅ **Data persistence** with real JSON files stored in `.bugit/issues/`
+- ✅ **Concurrent access safety** with cross-platform file locking
 - ✅ **Production error handling** with retry logic and structured responses
 - ✅ **Full command functionality** (new, list, show, edit, delete, config)
 - ✅ **Secure API key management** with automatic .env file creation
 - ✅ **Multi-provider support** architecture for future AI service expansion
-- ✅ **Comprehensive testing** with real AI integration coverage
+- ✅ **Comprehensive testing** with real AI integration and production storage coverage
 
-### 🔄 Phase 3: Production File Operations - NEXT
-- Atomic file writes with write-then-rename pattern
-- Concurrent access safety with proper file locking
-- Real filesystem operations replacing mock storage
-- Index management and caching for performance
-- Backup and recovery mechanisms
-
-### 🔄 Phase 4: Advanced Features - NEXT  
-- Performance optimization for large issue lists
+### 🔄 Phase 4: Advanced Features & Polish - NEXT
+- Performance optimization for large issue lists (100+ issues)
+- Advanced caching mechanisms for efficient operations
+- Enhanced Windows file locking implementation
 - Advanced filtering and search capabilities
 - Integration with external tools (GitHub, Notion, Linear)
 - Custom sorting and archiving features
+- Duplicate detection and similarity analysis
 
 ## Testing the Current Implementation
 
-You can fully test all functionality with the current real LangGraph implementation:
+You can fully test all functionality with the current production implementation:
 
 ```bash
-# Create sample issues (real AI processing)
+# Create sample issues (real AI processing with file persistence)
 python cli.py new "Critical login bug: users can't authenticate"
 python cli.py new "Minor UI issue with button alignment" --pretty
 python cli.py new "Camera crash when switching modes"
@@ -336,20 +351,23 @@ python cli.py list --pretty
 python cli.py list --severity critical --pretty
 python cli.py list --tag auth
 
-# Show detailed issue information
+# Show detailed issue information (reads from actual files)
 python cli.py show 1 --pretty     # Pretty panel
 python cli.py show abc123         # JSON object
 
-# Edit issues with real AI validation
+# Edit issues with real AI validation (atomic file updates)
 python cli.py edit 1 --severity low --add-tag ui --pretty
 
-# Delete issues (JSON mode requires --force)
+# Delete issues with backup (atomic file operations)
 python cli.py delete 2 --force
 
 # Configuration management
 python cli.py config --set model gpt-3.5-turbo
 python cli.py config --set-api-key openai sk-your-key-here
 python cli.py config --export backup.json
+
+# Check storage statistics
+python -c "from core.storage import get_storage_stats; import json; print(json.dumps(get_storage_stats(), indent=2))"
 ```
 
 ## Architecture Highlights
@@ -359,6 +377,13 @@ python cli.py config --export backup.json
 - **OpenAI API**: Real AI-powered bug analysis and categorization
 - **Retry Logic**: Robust error handling with configurable retry attempts
 - **Structured Validation**: Pydantic models ensure consistent AI output
+
+### Production File Operations
+- **Atomic Writes**: Write-then-rename pattern prevents partial writes and data corruption
+- **Cross-Platform Locking**: Concurrent access safety on Unix and Windows
+- **Real Persistence**: Individual JSON files in `.bugit/issues/` directory
+- **Data Safety**: Optional backup on delete, graceful handling of corrupted files
+- **Error Handling**: Comprehensive StorageError hierarchy for structured responses
 
 ### Automation-First Design
 - **JSON by Default**: Perfect for scripting, CI/CD, and automation workflows
@@ -378,10 +403,40 @@ python cli.py config --export backup.json
 - Proper exit codes and error propagation
 
 ### Testing & Quality
-- 22/22 tests passing with real AI integration coverage
+- 22/22 tests passing with real AI integration and production storage coverage
 - Test fixtures for isolation and repeatability  
 - Real LangGraph testing with API validation
+- Production file operations testing with atomic writes
 - Pytest configuration with proper markers
+
+## File Storage Structure
+
+Issues are stored as individual JSON files:
+
+```
+.bugit/
+├── issues/
+│   ├── a1b2c3.json    # Individual issue file
+│   ├── d4e5f6.json    # Another issue
+│   └── ...            # More issues
+└── backups/           # Optional backup directory
+    ├── a1b2c3_1672531200.json  # Timestamped backup
+    └── ...
+```
+
+Each issue file contains:
+```json
+{
+  "id": "a1b2c3",
+  "schema_version": "v1",
+  "title": "Logout screen hangs on exit",
+  "description": "App gets stuck after logging out. Needs force close.",
+  "tags": ["auth", "logout"],
+  "severity": "critical",
+  "type": "bug",
+  "created_at": "2025-07-01T13:00:00"
+}
+```
 
 ## Contributing
 
@@ -393,13 +448,14 @@ python cli.py config --export backup.json
 
 ## Next Steps
 
-Ready for **Phase 3** implementation:
-1. **Atomic File Operations**: Implement write-then-rename and concurrent access
-2. **Performance Optimization**: Add caching and efficient operations for large datasets
-3. **Advanced Features**: Custom sorting, archiving, and external integrations
-4. **Deployment**: Package for distribution and CI/CD integration
+Ready for **Phase 4** implementation:
+1. **Performance Optimization**: Caching and efficient operations for large datasets
+2. **Advanced Features**: Custom sorting, archiving, and search capabilities
+3. **External Integrations**: GitHub, Notion, Linear integrations
+4. **Enhanced Windows Support**: Improved file locking implementation
+5. **Deployment**: Package for distribution and CI/CD integration
 
-The current implementation provides a complete AI-powered CLI tool with real LangGraph integration, automation-friendly JSON output, and production-quality error handling.
+The current implementation provides a complete AI-powered CLI tool with real LangGraph integration, production-quality file operations with atomic writes, cross-platform compatibility, and automation-friendly JSON output.
 
 ## License
 

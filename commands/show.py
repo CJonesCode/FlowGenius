@@ -26,25 +26,10 @@ def show(
     Use --pretty for human-readable output with syntax highlighting.
     """
     try:
-        # Try to get issue by ID first, then by index
+        # Handle both UUID and index using new storage functions
         if id_or_index.isdigit():
-            # Index-based selection
-            issues = storage.list_issues()
-            index = int(id_or_index) - 1  # Convert to 0-based
-            
-            if 0 <= index < len(issues):
-                issue = issues[index]
-            else:
-                error_msg = f"Invalid index: {id_or_index}. Use 'bugit list' to see available issues."
-                if pretty_output:
-                    typer.echo(error_msg, err=True)
-                else:
-                    output = {
-                        "success": False,
-                        "error": error_msg
-                    }
-                    typer.echo(json.dumps(output, indent=2))
-                raise typer.Exit(1)
+            # Index-based selection - use new storage function
+            issue = storage.get_issue_by_index(int(id_or_index))
         else:
             # UUID-based selection
             issue = storage.load_issue(id_or_index)
@@ -83,11 +68,23 @@ def show(
             # JSON output (default)
             typer.echo(json.dumps(issue, indent=2))
         
+    except storage.StorageError as e:
+        # Handle storage-specific errors
+        error_msg = str(e)
+        if pretty_output:
+            typer.echo(f"Error: {error_msg}", err=True)
+        else:
+            output = {
+                "success": False,
+                "error": error_msg
+            }
+            typer.echo(json.dumps(output, indent=2))
+        raise typer.Exit(1)
     except typer.Exit:
         # Re-raise typer.Exit to preserve exit codes
         raise
     except Exception as e:
-        error_msg = f"Error showing issue: {e}"
+        error_msg = f"Unexpected error: {e}"
         if pretty_output:
             typer.echo(error_msg, err=True)
         else:

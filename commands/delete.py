@@ -25,30 +25,15 @@ def delete(
     Use --pretty for human-readable output with confirmation prompts.
     """
     try:
-        # Get the issue to delete
+        # Get the issue to delete using new storage functions
         if id_or_index.isdigit():
-            # Index-based selection
-            issues = storage.list_issues()
-            index = int(id_or_index) - 1  # Convert to 0-based
-            
-            if 0 <= index < len(issues):
-                issue = issues[index]
-                issue_id = issue['id']
-            else:
-                error_msg = f"Invalid index: {id_or_index}. Use 'bugit list' to see available issues."
-                if pretty_output:
-                    typer.echo(error_msg, err=True)
-                else:
-                    output = {
-                        "success": False,
-                        "error": error_msg
-                    }
-                    typer.echo(json.dumps(output, indent=2))
-                raise typer.Exit(1)
+            # Index-based selection - use new storage function
+            issue = storage.get_issue_by_index(int(id_or_index))
         else:
             # UUID-based selection
             issue = storage.load_issue(id_or_index)
-            issue_id = issue['id']
+        
+        issue_id = issue['id']
         
         # Show what will be deleted and handle confirmation
         if pretty_output:
@@ -74,33 +59,36 @@ def delete(
                 typer.echo(json.dumps(output, indent=2))
                 return
         
-        # Delete the issue
-        success = storage.delete_issue(issue_id)
+        # Delete the issue (new storage function raises exception on failure)
+        storage.delete_issue(issue_id)
         
         if pretty_output:
-            if success:
-                typer.echo(f"Issue {issue_id} deleted successfully.")
-            else:
-                typer.echo(f"Failed to delete issue {issue_id}.", err=True)
-                raise typer.Exit(1)
+            typer.echo(f"Issue {issue_id} deleted successfully.")
         else:
             output = {
-                "success": success,
+                "success": True,
                 "id": issue_id,
                 "title": issue['title']
             }
-            if not success:
-                output["error"] = "Failed to delete issue"
             typer.echo(json.dumps(output, indent=2))
             
-            if not success:
-                raise typer.Exit(1)
-            
+    except storage.StorageError as e:
+        # Handle storage-specific errors
+        error_msg = str(e)
+        if pretty_output:
+            typer.echo(f"Error: {error_msg}", err=True)
+        else:
+            output = {
+                "success": False,
+                "error": error_msg
+            }
+            typer.echo(json.dumps(output, indent=2))
+        raise typer.Exit(1)
     except typer.Exit:
         # Re-raise typer.Exit to preserve exit codes
         raise
     except Exception as e:
-        error_msg = f"Error deleting issue: {e}"
+        error_msg = f"Unexpected error: {e}"
         if pretty_output:
             typer.echo(error_msg, err=True)
         else:

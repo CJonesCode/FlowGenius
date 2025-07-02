@@ -15,18 +15,38 @@ class TestBasicInfrastructure:
         assert sample_issue['id'] == 'test123'
         assert sample_issue['severity'] == 'medium'
     
-    def test_storage_stubs(self):
-        """Test that storage stubs are functional"""
-        # Test list_issues returns expected data
-        issues = storage.list_issues()
-        assert len(issues) == 2
-        assert issues[0]['severity'] == 'critical'
-        assert issues[1]['severity'] == 'low'
+    def test_storage_production(self):
+        """Test that production storage is functional"""
+        # Create a test issue
+        test_data = {
+            'id': 'test-storage',
+            'title': 'Test Storage Issue',
+            'description': 'Testing production storage',
+            'severity': 'medium',
+            'tags': ['test'],
+            'schema_version': 'v1'
+        }
         
-        # Test load_issue returns mock data
-        issue = storage.load_issue('test123')
-        assert issue['id'] == 'test123'
-        assert 'Mock Issue' in issue['title']
+        # Test save_issue
+        saved_id = storage.save_issue(test_data)
+        assert saved_id == 'test-storage'
+        
+        # Test load_issue
+        loaded_issue = storage.load_issue('test-storage')
+        assert loaded_issue['id'] == 'test-storage'
+        assert loaded_issue['title'] == 'Test Storage Issue'
+        
+        # Test list_issues includes our test issue
+        issues = storage.list_issues()
+        test_issue_found = any(issue['id'] == 'test-storage' for issue in issues)
+        assert test_issue_found
+        
+        # Test delete_issue
+        storage.delete_issue('test-storage')
+        
+        # Verify it's gone
+        with pytest.raises(storage.StorageError):
+            storage.load_issue('test-storage')
     
     def test_schema_validation(self):
         """Test that schema validation is working"""
