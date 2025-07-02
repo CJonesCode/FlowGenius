@@ -1,7 +1,8 @@
 {
+  "model": "gpt-4",
   "enum_mode": "auto",
   "output_format": "table",
   "retry_limit": 3,
   "default_severity": "medium",
-  "model": "gpt-4"
-} 
+  "nonexistent_key": "value"
+}

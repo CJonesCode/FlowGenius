@@ -184,9 +184,6 @@ cython_debug/
 # BugIt CLI Specific
 # ===================================
 
-# BugIt Configuration (contains API keys - NEVER commit!)
-.bugitrc
-
 # BugIt Runtime Directory (issue storage)
 # Note: In production use, users may want to track .bugit/ in their project repos
 # For development/testing, we ignore it to avoid committing test data
