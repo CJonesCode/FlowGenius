@@ -6,11 +6,13 @@ Processes freeform descriptions using LangGraph and saves structured issues.
 import typer
 import json
 from core import model, storage, schema
+from core.styles import Styles, Colors
+from rich.console import Console
 
 
 def new(
     description: str,
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format")
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format")
 ):
     """
     Create a new bug report from a freeform description.
@@ -20,7 +22,7 @@ def new(
         pretty_output: Show human-readable output instead of JSON
     
     Default output is JSON for easy scripting and automation.
-    Use --pretty for human-readable output with emojis and formatting.
+    Use --pretty for human-readable output with clean formatting.
     """
     try:
         # Process description with LangGraph (stub)
@@ -33,20 +35,33 @@ def new(
         uuid = storage.save_issue(validated)
         
         if pretty_output:
-            # Display comprehensive AI-generated results (human-readable)
-            typer.echo(f"Issue created: {uuid}")
-            typer.echo(f"Title: {validated['title']}")
-            typer.echo(f"Severity: {validated['severity']}")
-            typer.echo(f"Type: {validated['type']}")
+            # Display comprehensive AI-generated results (human-readable) with styling
+            console = Console()
             
+            console.print("Issue created: ", style=Colors.SECONDARY, end="")
+            console.print(uuid, style=Colors.IDENTIFIER)
+            
+            console.print("Title: ", style=Colors.SECONDARY, end="")
+            console.print(validated['title'], style=Colors.PRIMARY)
+            
+            console.print("Severity: ", style=Colors.SECONDARY, end="")
+            console.print(validated['severity'], style=Styles.get_severity_color(validated['severity']))
+            
+            console.print("Type: ", style=Colors.SECONDARY, end="")
+            console.print(validated['type'], style=Colors.PRIMARY)
+            
+            console.print("Tags: ", style=Colors.SECONDARY, end="")
             if validated.get('tags'):
                 tags_str = ", ".join(validated['tags'])
-                typer.echo(f"Tags: {tags_str}")
+                console.print(tags_str, style=Colors.WARNING)
             else:
-                typer.echo("Tags: (none)")
+                console.print("(none)", style=Colors.SECONDARY)
             
-            typer.echo(f"Created: {validated['created_at']}")
-            typer.echo(f"Saved to: .bugit/issues/{uuid}.json")
+            console.print("Created: ", style=Colors.SECONDARY, end="")
+            console.print(validated['created_at'], style=Colors.SUCCESS)
+            
+            console.print("Saved to: ", style=Colors.SECONDARY, end="")
+            console.print(f".bugit/issues/{uuid}.json", style=Colors.SECONDARY)
         else:
             # Output JSON for scripting/automation (default)
             output = {
@@ -59,7 +74,8 @@ def new(
     except Exception as e:
         error_msg = f"Error creating issue: {e}"
         if pretty_output:
-            typer.echo(error_msg, err=True)
+            console = Console()
+            console.print(Styles.error(error_msg))
         else:
             output = {
                 "success": False,

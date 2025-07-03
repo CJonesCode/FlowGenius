@@ -1,126 +1,122 @@
 """
-Basic tests to verify test infrastructure and fixtures are working.
+Basic infrastructure tests to verify test fixtures and foundational setup.
+These tests ensure that the testing infrastructure itself is working correctly.
+For comprehensive module testing, see the module-specific test files:
+- test_core_storage.py (storage functionality)
+- test_core_schema.py (schema validation)
+- test_core_model.py (AI model processing)
+- test_core_config.py (configuration management)
+- test_commands_*.py (CLI command functionality)
 """
 
 import pytest
+from unittest.mock import patch
 from core import storage, schema, model, config
 
 
+@pytest.mark.unit
 class TestBasicInfrastructure:
-    """Test that our basic infrastructure is working"""
+    """Test that our basic test infrastructure is working correctly"""
     
     def test_fixtures_work(self, mock_config, sample_issue):
-        """Test that our fixtures are properly configured"""
+        """Test that our pytest fixtures are properly configured"""
         assert mock_config['model'] == 'gpt-4'
+        assert mock_config['openai_api_key'] == 'test-key-123'
         assert sample_issue['id'] == 'test123'
         assert sample_issue['severity'] == 'medium'
+        assert sample_issue['type'] == 'bug'
     
-    def test_storage_production(self):
-        """Test that production storage is functional"""
-        # Create a test issue
-        test_data = {
-            'id': 'test-storage',
-            'title': 'Test Storage Issue',
-            'description': 'Testing production storage',
-            'severity': 'medium',
-            'tags': ['test'],
-            'schema_version': 'v1'
-        }
+    def test_temp_dir_fixture(self, temp_dir):
+        """Test that temporary directory fixture is working"""
+        import os
+        assert temp_dir.exists()
+        assert temp_dir.is_dir()
         
-        # Test save_issue
-        saved_id = storage.save_issue(test_data)
-        assert saved_id == 'test-storage'
+        # Should be able to create files in temp dir
+        test_file = temp_dir / 'test.txt'
+        test_file.write_text('test content')
+        assert test_file.exists()
+        assert test_file.read_text() == 'test content'
+    
+    def test_mock_fixtures_isolated(self, mock_config_operations):
+        """Test that mock fixtures provide proper isolation"""
+        # Mock fixtures should prevent real API calls
+        assert mock_config_operations is not None
         
-        # Test load_issue
-        loaded_issue = storage.load_issue('test-storage')
-        assert loaded_issue['id'] == 'test-storage'
-        assert loaded_issue['title'] == 'Test Storage Issue'
+        # This should not make a real API call due to mocking
+        with patch('core.model.ChatOpenAI') as mock_openai:
+            mock_openai.return_value.invoke.return_value.content = '{"title": "test"}'
+            # This would normally fail without API key, but should work with mocks
+            try:
+                result = model.process_description("test description")
+                # If we get here, mocking is working
+                assert isinstance(result, dict)
+            except Exception as e:
+                # If mocking isn't working properly, this test should catch it
+                pytest.fail(f"Mock isolation failed: {e}")
+
+
+@pytest.mark.integration
+class TestBasicIntegration:
+    """Basic smoke tests for critical system integration points"""
+    
+    def test_full_workflow_smoke_test(self, temp_dir):
+        """Smoke test that basic workflow components can work together"""
+        import os
+        os.chdir(temp_dir)
         
-        # Test list_issues includes our test issue
+        # Test that storage directory creation works
+        issues_dir = storage.ensure_issues_directory()
+        assert issues_dir.exists()
+        
+        # Test that schema validation produces valid structure
+        test_data = {'title': 'Test Issue', 'description': 'Test Description'}
+        validated = schema.validate_or_default(test_data)
+        assert 'id' in validated
+        assert 'schema_version' in validated
+        assert validated['schema_version'] == 'v1'
+        
+        # Test that storage can save and load the validated data
+        issue_id = storage.save_issue(validated)
+        loaded = storage.load_issue(issue_id)
+        assert loaded['title'] == 'Test Issue'
+        
+        # Test that list functionality works
         issues = storage.list_issues()
-        test_issue_found = any(issue['id'] == 'test-storage' for issue in issues)
-        assert test_issue_found
+        assert len(issues) == 1
+        assert issues[0]['id'] == issue_id
         
-        # Test delete_issue
-        storage.delete_issue('test-storage')
-        
-        # Verify it's gone
-        with pytest.raises(storage.StorageError):
-            storage.load_issue('test-storage')
-    
-    def test_schema_validation(self):
-        """Test that schema validation is working"""
-        # Test valid data passes through
-        valid_data = {
-            'title': 'Test issue',
-            'description': 'Test description',
-            'severity': 'high',
-            'tags': ['test']
-        }
-        
-        result = schema.validate_or_default(valid_data)
-        assert result['title'] == 'Test issue'
-        assert result['severity'] == 'high'
-        assert result['schema_version'] == 'v1'
-        assert 'id' in result
-        assert 'created_at' in result
-    
-    def test_model_processing(self):
-        """Test that model processing is working"""
-        # Test with critical keywords - should detect high severity
-        result = model.process_description("System crash on startup")
-        assert result['severity'] in ['critical', 'high']  # AI should detect severity
-        assert result['title']  # Should generate a title
-        assert isinstance(result['tags'], list)  # Should generate tags
-        
-        # Test with UI keywords - should detect UI-related tags or generate appropriate response
-        result = model.process_description("UI interface looks wrong")
-        # Just verify we get a valid response structure
-        assert result['title']
-        assert result['severity'] in ['low', 'medium', 'high', 'critical']
-        assert isinstance(result['tags'], list)
-        
-        # Test title generation - should generate some kind of title
-        result = model.process_description("This is a long description. It has multiple sentences.")
-        assert result['title']  # Should generate a title (any title)
-        assert len(result['title']) <= 120  # Should respect length limit
-        assert result['description'] == "This is a long description. It has multiple sentences."  # Should preserve original
-    
-    def test_config_management(self):
-        """Test that configuration management is working"""
-        default_config = config.load_config()
-        assert default_config['model'] == 'gpt-4'
-        assert default_config['enum_mode'] == 'auto'
+        # Clean up
+        storage.delete_issue(issue_id)
+        final_issues = storage.list_issues()
+        assert len(final_issues) == 0
 
 
 @pytest.mark.unit
-class TestValidationEdgeCases:
-    """Test edge cases for validation logic"""
+class TestImportStructure:
+    """Test that all modules can be imported correctly"""
     
-    def test_empty_title_raises_error(self):
-        """Test that empty title raises ValidationError"""
-        with pytest.raises(schema.ValidationError):
-            schema.validate_or_default({'title': ''})
-    
-    def test_long_title_truncated(self):
-        """Test that long titles are properly truncated"""
-        long_title = "a" * 150
-        result = schema.validate_or_default({'title': long_title})
-        assert len(result['title']) <= 120
-        assert result['title'].endswith('...')
-    
-    def test_invalid_severity_defaults(self):
-        """Test that invalid severity values default to medium"""
-        result = schema.validate_or_default({
-            'title': 'Test',
-            'severity': 'invalid'
-        })
-        assert result['severity'] == 'medium'
-    
-    def test_empty_description_handling(self):
-        """Test that model rejects empty descriptions"""
-        with pytest.raises(model.ModelError):
-            model.process_description("")
+    def test_core_modules_import(self):
+        """Test that all core modules can be imported without errors"""
+        from core import storage, schema, model, config, styles
         
-        with pytest.raises(model.ModelError):
-            model.process_description("   ") 
+        # Verify key functions exist
+        assert hasattr(storage, 'save_issue')
+        assert hasattr(storage, 'load_issue')
+        assert hasattr(schema, 'validate_or_default')
+        assert hasattr(model, 'process_description')
+        assert hasattr(config, 'load_config')
+        assert hasattr(styles, 'Styles')
+        assert hasattr(styles, 'Colors')
+    
+    def test_command_modules_import(self):
+        """Test that all command modules can be imported without errors"""
+        from commands import new, list, show, edit, delete, config
+        
+        # Verify main functions exist
+        assert hasattr(new, 'new')
+        assert hasattr(list, 'list_issues')
+        assert hasattr(show, 'show')
+        assert hasattr(edit, 'edit')
+        assert hasattr(delete, 'delete')
+        assert hasattr(config, 'config') 

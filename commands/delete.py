@@ -10,8 +10,8 @@ from core import storage
 
 def delete(
     id_or_index: str,
-    force: bool = typer.Option(False, "--force", help="Skip confirmation prompt"),
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format")
+    force: bool = typer.Option(False, "-f", "--force", help="Skip confirmation prompt"),
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format")
 ):
     """
     Delete a bug report permanently.

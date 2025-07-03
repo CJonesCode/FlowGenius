@@ -21,6 +21,9 @@ if sys.platform.startswith('win'):
 else:
     import fcntl
 
+# Import config to access backup preferences
+from .config import get_config_value
+
 class StorageError(Exception):
     """Raised when storage operations fail"""
     pass
@@ -290,7 +293,7 @@ def list_issues() -> List[Dict]:
 def delete_issue(issue_id: str) -> bool:
     """
     Delete issue by ID with atomic operation and backup.
-    Returns True if successful, raises StorageError on failure.
+    Returns True if successful, False if issue not found.
     """
     if not issue_id or not isinstance(issue_id, str):
         raise StorageError("Issue ID must be a non-empty string")
@@ -299,13 +302,17 @@ def delete_issue(issue_id: str) -> bool:
     issue_file = issues_dir / f"{issue_id}.json"
     
     if not issue_file.exists():
-        raise StorageError(f"Issue not found: {issue_id}")
+        return False
     
     try:
         with file_lock(issue_file):
             # Create backup before deletion (optional, for recovery)
             backup_dir = issues_dir.parent / "backups"
-            if os.getenv('BUGIT_BACKUP_ON_DELETE', 'true').lower() == 'true':
+            backup_setting = get_config_value('backup_on_delete')
+            if backup_setting is None:
+                backup_setting = True  # Default to True for safety
+            
+            if backup_setting:
                 backup_dir.mkdir(exist_ok=True)
                 backup_file = backup_dir / f"{issue_id}_{int(time.time())}.json"
                 shutil.copy2(issue_file, backup_file)
@@ -327,7 +334,7 @@ def get_issue_by_index(index: int) -> Dict:
     Index is 1-based to match CLI display.
     """
     if not isinstance(index, int) or index < 1:
-        raise StorageError("Index must be a positive integer")
+        raise StorageError("Invalid index")
     
     issues = list_issues()
     
@@ -341,13 +348,28 @@ def get_storage_stats() -> Dict:
     issues_dir = ensure_issues_directory()
     
     try:
-        issue_files = list(issues_dir.glob("*.json"))
-        total_size = sum(f.stat().st_size for f in issue_files if f.is_file())
+        issues = list_issues()  # Get actual issues to count by severity
+        total_size = 0
+        severity_counts = {'low': 0, 'medium': 0, 'high': 0, 'critical': 0}
+        
+        # Count issues by severity and calculate total size
+        for issue in issues:
+            severity = issue.get('severity', 'medium')
+            if severity in severity_counts:
+                severity_counts[severity] += 1
+            
+            # Calculate file size
+            issue_id = issue.get('id')
+            if issue_id:
+                issue_file = issues_dir / f"{issue_id}.json"
+                if issue_file.exists():
+                    total_size += issue_file.stat().st_size
         
         return {
             'issues_directory': str(issues_dir),
-            'total_issues': len(issue_files),
+            'total_issues': len(issues),
             'total_size_bytes': total_size,
+            'issues_by_severity': severity_counts,
             'directory_exists': issues_dir.exists(),
             'directory_writable': os.access(issues_dir, os.W_OK)
         }
@@ -355,5 +377,8 @@ def get_storage_stats() -> Dict:
         return {
             'error': str(e),
             'issues_directory': str(issues_dir),
-            'directory_exists': issues_dir.exists() if issues_dir else False
+            'directory_exists': issues_dir.exists() if issues_dir else False,
+            'total_issues': 0,
+            'total_size_bytes': 0,
+            'issues_by_severity': {'low': 0, 'medium': 0, 'high': 0, 'critical': 0}
         } 

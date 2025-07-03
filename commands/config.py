@@ -13,12 +13,12 @@ from core import config as config_core
 
 
 def config(
-    get: Optional[str] = typer.Option(None, "--get", help="Get a config value"),
+    get: Optional[str] = typer.Option(None, "-g", "--get", help="Get a config value"),
     set_key: Optional[str] = typer.Option(None, "--set", help="Config key to set"),
     set_api_key: Optional[str] = typer.Option(None, "--set-api-key", help="Set API key for provider (openai, anthropic, google)"),
     import_file: Optional[Path] = typer.Option(None, "--import", help="Import preferences from JSON file"),
     export_file: Optional[Path] = typer.Option(None, "--export", help="Export preferences to JSON file"),
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format"),
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format"),
     value: Optional[str] = typer.Argument(None, help="Value to set (for --set or --set-api-key)")
 ):
     """
@@ -28,7 +28,7 @@ def config(
     API keys are saved to .env file and loaded automatically.
     
     Default output is JSON for easy scripting and automation.
-    Use --pretty for human-readable output with emojis and helpful hints.
+    Use --pretty for human-readable output with helpful information.
     """
     try:
         # Set API key persistently to .env file
@@ -148,7 +148,7 @@ def config(
         
         # Show all config (default behavior)
         if pretty_output:
-            # Human-readable output with emojis and hints
+            # Human-readable output with helpful information
             typer.echo("Current configuration:")
             typer.echo()
             
@@ -172,11 +172,8 @@ def config(
             # Show preferences
             for key, val in current_config.items():
                 if not key.endswith('_api_key'):
-                    source = ""
-                    if key == 'model' and 'BUGIT_MODEL' in os.environ:
-                        source = " (from environment)"
-                    else:
-                        source = " (from .bugitrc)" if Path('.bugitrc').exists() else " (default)"
+                    # Only API keys use environment variables, preferences come from .bugitrc or defaults
+                    source = " (from .bugitrc)" if Path('.bugitrc').exists() else " (default)"
                     typer.echo(f"  {key}: {val}{source}")
             
             # Show helpful hints

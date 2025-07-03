@@ -12,10 +12,10 @@ from core import storage, schema
 def edit(
     id_or_index: str,
     title: Optional[str] = typer.Option(None, "--title", help="Update title"),
-    severity: Optional[str] = typer.Option(None, "--severity", help="Update severity"),
-    add_tag: Optional[str] = typer.Option(None, "--add-tag", help="Add a tag"),
-    remove_tag: Optional[str] = typer.Option(None, "--remove-tag", help="Remove a tag"),
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format")
+    severity: Optional[str] = typer.Option(None, "-s", "--severity", help="Update severity"),
+    add_tag: Optional[str] = typer.Option(None, "-a", "--add-tag", help="Add a tag"),
+    remove_tag: Optional[str] = typer.Option(None, "-r", "--remove-tag", help="Remove a tag"),
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format")
 ):
     """
     Edit an existing bug report.

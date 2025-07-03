@@ -6,14 +6,15 @@ Supports both UUID and index-based selection.
 import typer
 import json
 from core import storage
+from core.styles import Styles, Colors
 from rich.console import Console
 from rich.panel import Panel
-from rich.syntax import Syntax
+from rich.text import Text
 
 
 def show(
     id_or_index: str,
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable format")
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format")
 ):
     """
     Show detailed information about a specific bug report.
@@ -36,31 +37,51 @@ def show(
         
         # Display issue details
         if pretty_output:
-            # Human-readable output with Rich formatting
+            # Human-readable output with Rich formatting and consistent styling
             console = Console()
             
-            # Create a nice panel with issue details
-            title = f"{issue.get('title', 'No title')} (ID: {issue.get('id', 'N/A')})"
+            # Create a nice panel with issue details using centralized styles
+            title_text = Text()
+            title_text.append(issue.get('title', 'No title'), style=Colors.PRIMARY)
+            title_text.append(" (ID: ", style=Colors.SECONDARY)
+            title_text.append(issue.get('id', 'N/A'), style=Colors.IDENTIFIER)
+            title_text.append(")", style=Colors.SECONDARY)
             
-            content_lines = []
-            content_lines.append(f"**Severity:** {issue.get('severity', 'N/A')}")
-            content_lines.append(f"**Type:** {issue.get('type', 'N/A')}")
+            content = Text()
             
+            # Severity with dynamic coloring
+            content.append("Severity: ", style=Colors.SECONDARY)
+            severity_value = issue.get('severity', 'N/A')
+            content.append(severity_value, style=Styles.get_severity_color(severity_value))
+            content.append("\n")
+            
+            # Type
+            content.append("Type: ", style=Colors.SECONDARY)
+            content.append(issue.get('type', 'N/A'), style=Colors.PRIMARY)
+            content.append("\n")
+            
+            # Tags
+            content.append("Tags: ", style=Colors.SECONDARY)
             tags = issue.get('tags', [])
             if tags:
-                content_lines.append(f"**Tags:** {', '.join(tags)}")
+                content.append(', '.join(tags), style=Colors.WARNING)
             else:
-                content_lines.append("**Tags:** (none)")
-                
-            content_lines.append(f"**Created:** {issue.get('created_at', 'N/A')}")
-            content_lines.append("")
-            content_lines.append("**Description:**")
-            content_lines.append(issue.get('description', 'No description'))
+                content.append("(none)", style=Colors.SECONDARY)
+            content.append("\n")
+            
+            # Created date
+            content.append("Created: ", style=Colors.SECONDARY)
+            content.append(issue.get('created_at', 'N/A'), style=Colors.SUCCESS)
+            content.append("\n\n")
+            
+            # Description
+            content.append("Description:\n", style=Colors.SECONDARY)
+            content.append(issue.get('description', 'No description'), style=Colors.PRIMARY)
             
             panel = Panel(
-                "\n".join(content_lines),
-                title=title,
-                border_style="blue",
+                content,
+                title=title_text,
+                border_style=Colors.BRAND,
                 padding=(1, 2)
             )
             console.print(panel)
@@ -72,7 +93,8 @@ def show(
         # Handle storage-specific errors
         error_msg = str(e)
         if pretty_output:
-            typer.echo(f"Error: {error_msg}", err=True)
+            console = Console()
+            console.print(Styles.error(f"Error: {error_msg}"))
         else:
             output = {
                 "success": False,
@@ -86,7 +108,8 @@ def show(
     except Exception as e:
         error_msg = f"Unexpected error: {e}"
         if pretty_output:
-            typer.echo(error_msg, err=True)
+            console = Console()
+            console.print(Styles.error(error_msg))
         else:
             output = {
                 "success": False,

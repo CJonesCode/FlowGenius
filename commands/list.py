@@ -6,14 +6,15 @@ Shows issues in a formatted table with filtering options.
 import typer
 from typing import Optional
 from core import storage
+from core.styles import Styles, TableStyles
 from rich.console import Console
 from rich.table import Table
 
 
 def list_issues(
-    tag: Optional[str] = typer.Option(None, "--tag", help="Filter by tag"),
-    severity: Optional[str] = typer.Option(None, "--severity", help="Filter by severity"),
-    pretty_output: bool = typer.Option(False, "--pretty", help="Output in human-readable table format")
+    tag: Optional[str] = typer.Option(None, "-t", "--tag", help="Filter by tag"),
+    severity: Optional[str] = typer.Option(None, "-s", "--severity", help="Filter by severity"),
+    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable table format")
 ):
     """
     List all bug reports with optional filtering.
@@ -42,16 +43,18 @@ def list_issues(
 
 
 def _display_table(issues):
-    """Display issues in a formatted table"""
+    """Display issues in a formatted table with consistent styling"""
     console = Console()
     table = Table()
     
-    table.add_column("Index", style="cyan")
-    table.add_column("UUID", style="magenta")
-    table.add_column("Date", style="green")
-    table.add_column("Severity", style="red")
-    table.add_column("Tags", style="yellow")
-    table.add_column("Title", style="white")
+    # Use centralized table styles
+    styles = TableStyles.issue_list()
+    table.add_column("Index", style=styles["Index"])
+    table.add_column("UUID", style=styles["UUID"])
+    table.add_column("Date", style=styles["Date"])
+    table.add_column("Severity", style=styles["Severity"])  # None - handled by Styles.severity()
+    table.add_column("Tags", style=styles["Tags"])
+    table.add_column("Title", style=styles["Title"])
     
     for i, issue in enumerate(issues, 1):
         tags_str = ", ".join(issue.get('tags', []))
@@ -59,11 +62,12 @@ def _display_table(issues):
         if len(title) > 35:
             title = title[:32] + "..."
             
+        # Apply semantic styling for content
         table.add_row(
             f"[{i}]",
             issue.get('id', 'N/A'),
             issue.get('created_at', 'N/A')[:10],  # Just date part
-            issue.get('severity', 'N/A'),
+            Styles.severity(issue.get('severity', 'N/A')),  # Dynamic severity coloring
             tags_str,
             title
         )

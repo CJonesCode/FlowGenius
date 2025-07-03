@@ -14,7 +14,7 @@ This tool is designed to operate seamlessly in terminal environments like Cursor
 - **Atomic file operations with write-then-rename pattern**
 - **Cross-platform file locking and concurrent access safety**
 - **Real filesystem persistence replacing all mock storage**
-- Comprehensive test suite (22/22 tests passing)
+- **World-class test coverage: 96% with 447 passing tests**
 - Clean, professional output without emojis
 - Retry logic and structured error handling
 - Multi-provider AI support architecture implemented
@@ -97,7 +97,7 @@ This tool is designed to operate seamlessly in terminal environments like Cursor
 **Security-First Configuration:**
 - API keys stored in `.env` file (git-ignored)
 - User preferences in `.bugitrc` file
-- Environment variable override support
+- API key environment variable support (NO config overrides)
 - Multi-provider support ready (OpenAI, Anthropic, Google)
 
 #### Output Format ✅ IMPLEMENTED
@@ -290,7 +290,7 @@ bugit config --export backup.json
 
 ### Configuration System ✅ ENHANCED IMPLEMENTATION
 
-**Multi-Layer Configuration (Priority: Environment > .env > .bugitrc > defaults):**
+**Security-First Configuration (API keys separate from preferences):**
 
 #### 1. API Keys (.env file - git-ignored)
 ```bash
@@ -309,10 +309,12 @@ BUGIT_GOOGLE_API_KEY=your-google-api-key-here           # Future
 }
 ```
 
-#### 3. Environment Variable Overrides
+#### 3. Environment Variables (API Keys Only)
 ```bash
-export BUGIT_MODEL=gpt-3.5-turbo
-export BUGIT_OUTPUT_FORMAT=json
+# Only API keys use environment variables - NO configuration overrides
+export BUGIT_OPENAI_API_KEY=sk-your-key-here
+export BUGIT_ANTHROPIC_API_KEY=sk-ant-your-key-here  # Future
+export BUGIT_GOOGLE_API_KEY=your-google-key-here     # Future
 ```
 
 **Legacy Support:**
