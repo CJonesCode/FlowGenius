@@ -87,7 +87,7 @@ This tool is designed to operate seamlessly in terminal environments like Cursor
 
 **Production File Operations ✅:**
 - **Atomic File Writes**: Write-then-rename pattern prevents partial writes
-- **Cross-Platform File Locking**: Concurrent access safety (full on Unix, simplified on Windows)
+- **Cross-Platform File Locking**: Concurrent access safety (full on Unix and Windows)
 - **Real File Persistence**: Issues stored as individual JSON files in `.bugit/issues/`
 - **Dynamic Index Management**: Runtime index generation with proper sorting
 - **Storage Error Handling**: Comprehensive error hierarchy with structured responses
@@ -368,7 +368,7 @@ export BUGIT_GOOGLE_API_KEY=your-google-key-here     # Future
 
 #### ✅ Phase 3: Production File Operations - COMPLETE
 - **Atomic file operations with write-then-rename pattern**
-- **Cross-platform file locking for concurrent access safety**
+- **Cross-platform file locking for concurrent access safety (full Unix and Windows support)**
 - **Real filesystem persistence replacing all mock storage**
 - **Dynamic index management with runtime generation**
 - **Production error handling with StorageError hierarchy**
@@ -379,9 +379,9 @@ export BUGIT_GOOGLE_API_KEY=your-google-key-here     # Future
 #### 🔄 Phase 4: Advanced Features & Polish - NEXT
 - Performance optimization for large datasets
 - Advanced caching for hundreds of issues
-- Enhanced Windows file locking implementation
 - External tool integrations (GitHub, Notion, Linear)
 - Custom sorting and archiving features
+- Advanced search and filtering capabilities
 
 ### Stretch Goals
 - Testing strategy and tooling: ✅ **Implemented and Expanded**

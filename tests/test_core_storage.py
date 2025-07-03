@@ -13,6 +13,10 @@ from unittest.mock import patch, mock_open
 import os
 import platform
 
+# Import for Windows file locking constants
+if sys.platform.startswith('win'):
+    import msvcrt
+
 from core import storage
 from core.storage import (
     ensure_issues_directory, atomic_write_json, read_json_file,
@@ -458,9 +462,8 @@ class TestGetStorageStats:
         assert stats['total_issues'] == 1  # Only valid issue counted
 
 
-@pytest.mark.skipif(platform.system() == "Windows", reason="Full file locking not implemented on Windows")
 class TestFileLocking:
-    """Test file locking functionality (Unix only)"""
+    """Test file locking functionality (cross-platform)"""
     
     def test_file_lock_prevents_concurrent_access(self, temp_dir):
         """Test that file locking prevents concurrent access"""
@@ -850,9 +853,8 @@ class TestGetStorageStatsErrorPaths:
         # but shouldn't crash
 
 
-@pytest.mark.skipif(sys.platform.startswith('win'), reason="Unix file locking only")  
-class TestUnixFileLocking:
-    """Test Unix-specific file locking functionality"""
+class TestAdvancedFileLocking:
+    """Test advanced file locking functionality"""
     
     def test_file_lock_timeout_behavior(self, temp_dir):
         """Test file lock timeout functionality"""
@@ -875,8 +877,23 @@ class TestUnixFileLocking:
         """Test exception handling in file locking"""
         test_file = Path('exception_test.json')
         
-        # Mock fcntl.flock to raise an exception
-        with patch('fcntl.flock', side_effect=OSError("Lock failed")):
-            with pytest.raises(ConcurrentAccessError, match="Could not acquire lock"):
-                with storage.file_lock(test_file, timeout=0.1):
-                    pass 
+        # Mock the appropriate locking function based on platform
+        if sys.platform.startswith('win'):
+            # Mock msvcrt.locking to raise an exception for LK_NBLCK (lock attempts)
+            # but succeed for LK_UNLCK (unlock attempts) to avoid cleanup issues
+            def mock_locking(fd, mode, length):
+                if mode == msvcrt.LK_NBLCK:  # Lock attempt
+                    raise OSError("Lock failed")
+                # Unlock attempts succeed
+                return None
+            
+            with patch('msvcrt.locking', side_effect=mock_locking):
+                with pytest.raises(ConcurrentAccessError, match="Could not acquire lock"):
+                    with storage.file_lock(test_file, timeout=0.1):
+                        pass
+        else:
+            # Mock fcntl.flock to raise an exception on Unix
+            with patch('fcntl.flock', side_effect=OSError("Lock failed")):
+                with pytest.raises(ConcurrentAccessError, match="Could not acquire lock"):
+                    with storage.file_lock(test_file, timeout=0.1):
+                        pass 

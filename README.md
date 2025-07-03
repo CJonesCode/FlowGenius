@@ -47,7 +47,7 @@ Perfect for interactive development workflows:
 | | Multi-provider ready | 🔄 Architecture | Anthropic/Google support planned |
 | **Storage & Persistence** | | | |
 | | Atomic file operations | ✅ Complete | Write-then-rename pattern |
-| | Cross-platform locking | ⚠️ Partial | Unix full, Windows simplified |
+| | Cross-platform locking | ✅ Complete | Unix and Windows file locking |
 | | JSON file storage | ✅ Complete | Individual files per issue |
 | | Dynamic indexing | ✅ Complete | Runtime index generation |
 | | Corrupted file handling | ✅ Complete | Graceful error handling |

@@ -441,21 +441,44 @@ def load_config() -> Dict[str, Any]:
 
 ### 1. **File Operations**
 ```python
-# ✅ Good - Atomic operations
+# ✅ Good - Atomic operations with cross-platform file locking
 def save_issue_atomically(issue_data: dict) -> str:
-    """Save issue with atomic write-then-rename pattern."""
+    """Save issue with atomic write-then-rename pattern and file locking."""
     temp_file = issue_file.with_suffix('.tmp')
     
-    # Write to temporary file first
-    with open(temp_file, 'w', encoding='utf-8') as f:
-        json.dump(issue_data, f, indent=2)
+    # Use cross-platform file locking for concurrent safety
+    with file_lock(issue_file, timeout=5.0):
+        # Write to temporary file first
+        with open(temp_file, 'w', encoding='utf-8') as f:
+            json.dump(issue_data, f, indent=2)
+        
+        # Atomic rename
+        temp_file.rename(issue_file)
     
-    # Atomic rename
-    temp_file.rename(issue_file)
     return issue_data['id']
 ```
 
-### 2. **Memory Management**
+### 2. **Cross-Platform File Locking**
+```python
+# ✅ Good - Cross-platform file locking implementation
+@contextmanager
+def file_lock(file_path: Path, timeout: float = 10.0):
+    """
+    Cross-platform file locking with timeout support.
+    
+    - Windows: Uses msvcrt.locking() for mandatory file locking
+    - Unix/Linux: Uses fcntl.flock() for advisory file locking
+    """
+    if sys.platform.startswith('win'):
+        # Windows implementation using msvcrt.locking()
+        lock_file = file_path.with_suffix(file_path.suffix + '.lock')
+        # Implementation details...
+    else:
+        # Unix implementation using fcntl.flock() 
+        # Implementation details...
+```
+
+### 3. **Memory Management**
 ```python
 # ✅ Good - Process files incrementally for large datasets
 def list_issues_efficiently() -> List[dict]:

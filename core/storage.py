@@ -44,13 +44,50 @@ def file_lock(file_path: Path, timeout: float = 10.0):
     Cross-platform context manager for file locking with timeout.
     Prevents concurrent access to the same file.
     
-    Note: On Windows, file locking is currently disabled for compatibility.
-    This will be improved in a future version.
+    On Windows: Uses msvcrt.locking() for mandatory file locking
+    On Unix: Uses fcntl.flock() for advisory file locking
     """
     if sys.platform.startswith('win'):
-        # Simplified Windows implementation - just yield without locking
-        # TODO: Implement proper Windows file locking
-        yield
+        # Windows implementation using msvcrt.locking()
+        lock_file = file_path.with_suffix(file_path.suffix + '.lock')
+        lock_fd = None
+        
+        try:
+            # Create/open lock file in binary mode (required for msvcrt.locking)
+            lock_fd = os.open(str(lock_file), os.O_CREAT | os.O_WRONLY | os.O_TRUNC | os.O_BINARY)
+            
+            # Try to acquire exclusive lock with timeout
+            start_time = time.time()
+            while True:
+                try:
+                    # Lock the entire file (from byte 0, length 1)
+                    # LOCK_NB = non-blocking, LOCK_EX = exclusive lock
+                    msvcrt.locking(lock_fd, msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    if time.time() - start_time > timeout:
+                        raise ConcurrentAccessError(
+                            f"Could not acquire lock for {file_path} within {timeout} seconds"
+                        )
+                    time.sleep(0.1)
+            
+            yield
+            
+        except Exception as e:
+            if isinstance(e, ConcurrentAccessError):
+                raise
+            raise StorageError(f"File locking failed: {e}")
+        finally:
+            # Best effort cleanup
+            if lock_fd is not None:
+                try:
+                    # Unlock the file
+                    msvcrt.locking(lock_fd, msvcrt.LK_UNLCK, 1)
+                    os.close(lock_fd)
+                    lock_file.unlink(missing_ok=True)
+                except Exception:
+                    # Best effort cleanup - ignore errors
+                    pass
         return
     
     # Unix file locking implementation
