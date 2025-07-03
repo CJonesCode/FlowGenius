@@ -24,7 +24,6 @@ class TestLoadConfig:
     
     def test_loads_default_config_when_no_files(self, temp_dir):
         """Test loading default config when no files exist"""
-        os.chdir(temp_dir)
         
         result = load_config()
         
@@ -36,7 +35,6 @@ class TestLoadConfig:
     
     def test_loads_config_from_bugitrc(self, temp_dir):
         """Test loading config from .bugitrc file"""
-        os.chdir(temp_dir)
         
         # Create .bugitrc file
         bugitrc_data = {
@@ -61,7 +59,6 @@ class TestLoadConfig:
     
     def test_environment_variables_do_not_override_file(self, temp_dir):
         """Test that environment variables do NOT override .bugitrc file for non-API-key config"""
-        os.chdir(temp_dir)
         
         # Create .bugitrc file
         bugitrc_data = {'model': 'gpt-4', 'enum_mode': 'auto'}
@@ -83,7 +80,6 @@ class TestLoadConfig:
     
     def test_handles_corrupted_bugitrc_file(self, temp_dir):
         """Test handling of corrupted .bugitrc file"""
-        os.chdir(temp_dir)
         
         # Create corrupted JSON file
         with open('.bugitrc', 'w') as f:
@@ -96,7 +92,6 @@ class TestLoadConfig:
     
     def test_loads_api_keys_from_env_file(self, temp_dir):
         """Test loading API keys from .env file"""
-        os.chdir(temp_dir)
         
         # Create .env file
         with open('.env', 'w') as f:
@@ -111,7 +106,6 @@ class TestLoadConfig:
     
     def test_legacy_api_key_support_with_warning(self, temp_dir):
         """Test legacy BUGIT_API_KEY support with deprecation warning"""
-        os.chdir(temp_dir)
         
         env_vars = {'BUGIT_API_KEY': 'legacy-key-123'}
         
@@ -124,7 +118,6 @@ class TestLoadConfig:
     
     def test_environment_variables_only_for_api_keys(self, temp_dir):
         """Test that environment variables only work for API keys, not configuration"""
-        os.chdir(temp_dir)
         
         # Create .bugitrc with preferences
         bugitrc_data = {'retry_limit': 3, 'output_format': 'table'}
@@ -153,7 +146,6 @@ class TestSavePreferences:
     
     def test_saves_preferences_to_default_file(self, temp_dir):
         """Test saving preferences to default .bugitrc file"""
-        os.chdir(temp_dir)
         
         preferences = {
             'model': 'gpt-3.5-turbo',
@@ -174,7 +166,6 @@ class TestSavePreferences:
     
     def test_saves_preferences_to_custom_file(self, temp_dir):
         """Test saving preferences to custom file path"""
-        os.chdir(temp_dir)
         
         preferences = {'model': 'claude-3-sonnet'}
         custom_path = 'custom_config.json'
@@ -192,7 +183,6 @@ class TestSavePreferences:
     
     def test_overwrites_existing_preferences(self, temp_dir):
         """Test that existing preferences are overwritten"""
-        os.chdir(temp_dir)
         
         # Create initial preferences
         initial_prefs = {'model': 'gpt-4', 'old_setting': 'old_value'}
@@ -211,7 +201,6 @@ class TestSavePreferences:
     
     def test_handles_unicode_preferences(self, temp_dir):
         """Test saving preferences with unicode characters"""
-        os.chdir(temp_dir)
         
         preferences = {
             'custom_prompt': 'Analyze this émoji 🚀 and ünïcödé text',
@@ -232,7 +221,6 @@ class TestSetApiKey:
     
     def test_sets_openai_api_key(self, temp_dir):
         """Test setting OpenAI API key"""
-        os.chdir(temp_dir)
         
         set_api_key('openai', 'sk-test123')
         
@@ -247,7 +235,6 @@ class TestSetApiKey:
     
     def test_sets_anthropic_api_key(self, temp_dir):
         """Test setting Anthropic API key"""
-        os.chdir(temp_dir)
         
         set_api_key('anthropic', 'sk-ant-test456')
         
@@ -259,7 +246,6 @@ class TestSetApiKey:
     
     def test_appends_to_existing_env_file(self, temp_dir):
         """Test appending to existing .env file"""
-        os.chdir(temp_dir)
         
         # Create existing .env file
         with open('.env', 'w') as f:
@@ -276,7 +262,6 @@ class TestSetApiKey:
     
     def test_updates_existing_api_key(self, temp_dir):
         """Test updating existing API key"""
-        os.chdir(temp_dir)
         
         # Set initial key
         set_api_key('openai', 'sk-old123')
@@ -293,7 +278,6 @@ class TestSetApiKey:
     
     def test_handles_invalid_provider(self, temp_dir):
         """Test handling of invalid provider"""
-        os.chdir(temp_dir)
         
         # Should raise error or handle gracefully
         with pytest.raises((ValueError, KeyError)):
@@ -301,7 +285,6 @@ class TestSetApiKey:
     
     def test_handles_special_characters_in_key(self, temp_dir):
         """Test handling of special characters in API key"""
-        os.chdir(temp_dir)
         
         special_key = 'sk-test!@#$%^&*()_+-=[]{}|;:,.<>?'
         set_api_key('openai', special_key)
@@ -318,7 +301,6 @@ class TestGetConfigValue:
     
     def test_gets_existing_config_value(self, temp_dir):
         """Test getting existing configuration value"""
-        os.chdir(temp_dir)
         
         # Create config file
         config_data = {'model': 'gpt-3.5-turbo', 'retry_limit': 5}
@@ -330,7 +312,6 @@ class TestGetConfigValue:
     
     def test_gets_default_for_missing_key(self, temp_dir):
         """Test getting default value for missing key"""
-        os.chdir(temp_dir)
         
         # Default model should be returned
         assert get_config_value('model') == 'gpt-4'
@@ -340,7 +321,6 @@ class TestGetConfigValue:
     
     def test_environment_variables_do_not_override_config_file(self, temp_dir):
         """Test that environment variables do NOT override config file for non-API-key config"""
-        os.chdir(temp_dir)
         
         # Create config file
         config_data = {'model': 'gpt-4'}
@@ -357,7 +337,6 @@ class TestSetPreference:
     
     def test_sets_new_preference(self, temp_dir):
         """Test setting a new preference"""
-        os.chdir(temp_dir)
         
         set_preference('custom_setting', 'custom_value')
         
@@ -369,7 +348,6 @@ class TestSetPreference:
     
     def test_updates_existing_preference(self, temp_dir):
         """Test updating existing preference"""
-        os.chdir(temp_dir)
         
         # Create initial config
         initial_config = {'model': 'gpt-4', 'enum_mode': 'auto'}
@@ -388,7 +366,6 @@ class TestSetPreference:
     
     def test_preserves_existing_preferences(self, temp_dir):
         """Test that existing preferences are preserved when setting new ones"""
-        os.chdir(temp_dir)
         
         # Create initial config
         initial_config = {
@@ -417,7 +394,6 @@ class TestApiKeyChecking:
     
     def test_check_openai_api_key_with_env_var(self, temp_dir):
         """Test checking OpenAI API key via environment variable"""
-        os.chdir(temp_dir)
         
         with patch.dict(os.environ, {'BUGIT_OPENAI_API_KEY': 'sk-test123'}):
             assert check_openai_api_key() is True
@@ -428,7 +404,6 @@ class TestApiKeyChecking:
     
     def test_check_openai_api_key_with_env_file(self, temp_dir):
         """Test checking OpenAI API key via .env file"""
-        os.chdir(temp_dir)
         
         # Create .env file
         with open('.env', 'w') as f:
@@ -438,7 +413,6 @@ class TestApiKeyChecking:
     
     def test_check_api_key_general(self, temp_dir):
         """Test general API key checking"""
-        os.chdir(temp_dir)
         
         # With OpenAI key
         with patch.dict(os.environ, {'BUGIT_OPENAI_API_KEY': 'sk-test123'}):
@@ -454,7 +428,6 @@ class TestApiKeyChecking:
     
     def test_check_api_key_with_empty_values(self, temp_dir):
         """Test API key checking with empty values"""
-        os.chdir(temp_dir)
         
         # Empty string should be considered missing
         with patch.dict(os.environ, {'BUGIT_OPENAI_API_KEY': ''}):
@@ -470,7 +443,6 @@ class TestSetConfigValue:
     
     def test_sets_config_value_directly(self, temp_dir):
         """Test setting config value directly"""
-        os.chdir(temp_dir)
         
         set_config_value('model', 'claude-3-sonnet')
         
@@ -479,7 +451,6 @@ class TestSetConfigValue:
     
     def test_sets_multiple_config_values(self, temp_dir):
         """Test setting multiple config values"""
-        os.chdir(temp_dir)
         
         set_config_value('model', 'gpt-3.5-turbo')
         set_config_value('retry_limit', 7)
@@ -496,7 +467,6 @@ class TestConfigIntegration:
     
     def test_full_config_workflow(self, temp_dir):
         """Test complete configuration workflow"""
-        os.chdir(temp_dir)
         
         # Set API key
         set_api_key('openai', 'sk-workflow123')
@@ -515,7 +485,6 @@ class TestConfigIntegration:
     
     def test_config_priority_order(self, temp_dir):
         """Test configuration priority: .bugitrc > defaults (env vars only for API keys)"""
-        os.chdir(temp_dir)
         
         # Set up .bugitrc
         bugitrc_data = {'model': 'from-bugitrc'}
@@ -534,7 +503,6 @@ class TestConfigIntegration:
     
     def test_config_error_recovery(self, temp_dir):
         """Test that config system recovers from errors gracefully"""
-        os.chdir(temp_dir)
         
         # Create corrupted .bugitrc
         with open('.bugitrc', 'w') as f:
@@ -557,7 +525,6 @@ class TestConfigValidation:
     
     def test_validates_retry_limit_range(self, temp_dir):
         """Test that retry_limit is validated to reasonable range"""
-        os.chdir(temp_dir)
         
         # Valid retry limits
         for valid_limit in [1, 3, 5, 10]:
@@ -574,7 +541,6 @@ class TestConfigValidation:
     
     def test_validates_model_names(self, temp_dir):
         """Test that model names are validated"""
-        os.chdir(temp_dir)
         
         # Clear environment to avoid pollution from other tests
         with patch.dict(os.environ, {}, clear=True):
@@ -597,7 +563,6 @@ class TestConfigErrorPaths:
     
     def test_load_config_with_corrupted_bugitrc_graceful_fallback(self, temp_dir):
         """Test lines 70-71: corrupted .bugitrc fallback to defaults"""
-        os.chdir(temp_dir)
         
         # Create corrupted .bugitrc file that causes JSONDecodeError
         with open('.bugitrc', 'w') as f:
@@ -620,7 +585,6 @@ class TestConfigErrorPaths:
     
     def test_save_preferences_exception_handling(self, temp_dir):
         """Test lines 95-96: save_preferences exception handling"""
-        os.chdir(temp_dir)
         
         # Test permission error during save
         preferences = {'model': 'gpt-4', 'retry_limit': 5}
@@ -636,7 +600,6 @@ class TestConfigErrorPaths:
     
     def test_set_api_key_empty_validation(self, temp_dir):
         """Test line 107: empty API key validation"""
-        os.chdir(temp_dir)
         
         # Test completely empty string
         with pytest.raises(ConfigError, match="API key cannot be empty"):
@@ -652,7 +615,6 @@ class TestConfigErrorPaths:
     
     def test_set_preference_corrupted_file_recovery(self, temp_dir):
         """Test lines 140-141: set_preference with corrupted .bugitrc"""
-        os.chdir(temp_dir)
         
         # Create corrupted .bugitrc file
         with open('.bugitrc', 'w') as f:
@@ -677,7 +639,6 @@ class TestConfigErrorPaths:
     
     def test_set_preference_api_key_rejection(self, temp_dir):
         """Test that setting API keys via set_preference is properly rejected"""
-        os.chdir(temp_dir)
         
         # Test various API key field names
         api_key_fields = ['openai_api_key', 'anthropic_api_key', 'google_api_key', 'custom_api_key']
@@ -693,7 +654,6 @@ class TestLegacyCompatibilityFunctions:
     
     def test_check_api_key_legacy_function(self, temp_dir):
         """Test line 162: check_api_key() legacy function"""
-        os.chdir(temp_dir)
         
         # Should return False when no API key is set
         with patch.dict(os.environ, {}, clear=True):
@@ -709,7 +669,6 @@ class TestLegacyCompatibilityFunctions:
     
     def test_set_config_value_legacy_function(self, temp_dir):
         """Test line 163: set_config_value() legacy function"""
-        os.chdir(temp_dir)
         
         # Should work the same as set_preference
         set_config_value('model', 'gpt-3.5-turbo')

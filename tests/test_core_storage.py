@@ -27,7 +27,6 @@ class TestEnsureIssuesDirectory:
     
     def test_creates_directory_when_missing(self, temp_dir):
         """Test that issues directory is created when it doesn't exist"""
-        os.chdir(temp_dir)
         
         # Ensure .bugit doesn't exist
         bugit_dir = Path('.bugit')
@@ -44,7 +43,6 @@ class TestEnsureIssuesDirectory:
     
     def test_returns_existing_directory(self, temp_dir):
         """Test that existing directory is returned without error"""
-        os.chdir(temp_dir)
         
         # Create directory manually
         bugit_dir = Path('.bugit')
@@ -64,7 +62,6 @@ class TestAtomicWriteJson:
     
     def test_writes_json_file_atomically(self, temp_dir):
         """Test that JSON data is written atomically"""
-        os.chdir(temp_dir)
         test_file = Path('test.json')
         test_data = {'id': 'test', 'title': 'Test Issue'}
         
@@ -79,7 +76,6 @@ class TestAtomicWriteJson:
     
     def test_handles_unicode_data(self, temp_dir):
         """Test that unicode data is handled correctly"""
-        os.chdir(temp_dir)
         test_file = Path('unicode.json')
         test_data = {'title': 'Test with émojis 🚀 and ünïcödé'}
         
@@ -91,7 +87,6 @@ class TestAtomicWriteJson:
     
     def test_overwrites_existing_file(self, temp_dir):
         """Test that existing files are overwritten"""
-        os.chdir(temp_dir)
         test_file = Path('overwrite.json')
         
         # Write initial data
@@ -113,7 +108,6 @@ class TestReadJsonFile:
     
     def test_reads_valid_json_file(self, temp_dir):
         """Test reading a valid JSON file"""
-        os.chdir(temp_dir)
         test_file = Path('valid.json')
         test_data = {'id': 'test', 'title': 'Valid Test'}
         
@@ -127,7 +121,6 @@ class TestReadJsonFile:
     
     def test_raises_error_for_missing_file(self, temp_dir):
         """Test that missing file raises StorageError"""
-        os.chdir(temp_dir)
         missing_file = Path('missing.json')
         
         with pytest.raises(StorageError, match="not found"):
@@ -135,7 +128,6 @@ class TestReadJsonFile:
     
     def test_raises_error_for_invalid_json(self, temp_dir):
         """Test that invalid JSON raises StorageError"""
-        os.chdir(temp_dir)
         invalid_file = Path('invalid.json')
         
         # Create invalid JSON
@@ -151,7 +143,6 @@ class TestSaveIssue:
     
     def test_saves_new_issue(self, temp_dir):
         """Test saving a new issue"""
-        os.chdir(temp_dir)
         issue_data = {
             'id': 'new-issue',
             'title': 'New Test Issue',
@@ -178,7 +169,6 @@ class TestSaveIssue:
     
     def test_overwrites_existing_issue(self, temp_dir):
         """Test that saving existing ID overwrites the file"""
-        os.chdir(temp_dir)
         issue_id = 'existing-issue'
         
         # Save initial version
@@ -204,7 +194,6 @@ class TestSaveIssue:
     
     def test_handles_special_characters_in_id(self, temp_dir):
         """Test saving issue with special characters in ID"""
-        os.chdir(temp_dir)
         # Note: file system safe characters only
         issue_data = {
             'id': 'issue-with_special123',
@@ -224,7 +213,6 @@ class TestLoadIssue:
     
     def test_loads_existing_issue(self, temp_dir):
         """Test loading an existing issue"""
-        os.chdir(temp_dir)
         issue_data = {
             'id': 'load-test',
             'title': 'Load Test Issue',
@@ -240,14 +228,12 @@ class TestLoadIssue:
     
     def test_raises_error_for_missing_issue(self, temp_dir):
         """Test that loading missing issue raises StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Issue.*not found"):
             load_issue('missing-issue')
     
     def test_handles_corrupted_issue_file(self, temp_dir):
         """Test handling of corrupted issue files"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create corrupted file
@@ -264,14 +250,12 @@ class TestListIssues:
     
     def test_lists_empty_directory(self, temp_dir):
         """Test listing when no issues exist"""
-        os.chdir(temp_dir)
         
         issues = list_issues()
         assert issues == []
     
     def test_lists_single_issue(self, temp_dir):
         """Test listing a single issue"""
-        os.chdir(temp_dir)
         issue_data = {
             'id': 'single',
             'title': 'Single Issue',
@@ -286,7 +270,6 @@ class TestListIssues:
     
     def test_lists_multiple_issues_sorted(self, temp_dir):
         """Test listing multiple issues with proper sorting"""
-        os.chdir(temp_dir)
         
         # Create issues with different severities and dates
         critical_issue = {
@@ -322,7 +305,6 @@ class TestListIssues:
     
     def test_skips_corrupted_files(self, temp_dir):
         """Test that corrupted files are skipped during listing"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create valid issue
@@ -345,7 +327,6 @@ class TestDeleteIssue:
     
     def test_deletes_existing_issue(self, temp_dir):
         """Test deleting an existing issue"""
-        os.chdir(temp_dir)
         issue_data = {'id': 'delete-me', 'title': 'Delete Test'}
         save_issue(issue_data)
         
@@ -362,14 +343,12 @@ class TestDeleteIssue:
     
     def test_returns_false_for_missing_issue(self, temp_dir):
         """Test that deleting missing issue returns False"""
-        os.chdir(temp_dir)
         
         result = delete_issue('missing-issue')
         assert result is False
     
     def test_creates_backup_when_requested(self, temp_dir):
         """Test that backup is created when backup_on_delete is enabled"""
-        os.chdir(temp_dir)
         issue_data = {'id': 'backup-test', 'title': 'Backup Test'}
         save_issue(issue_data)
         
@@ -396,7 +375,6 @@ class TestGetIssueByIndex:
     
     def test_gets_issue_by_valid_index(self, temp_dir):
         """Test getting issue by valid index"""
-        os.chdir(temp_dir)
         
         # Create multiple issues
         issue1 = {'id': 'first', 'title': 'First', 'severity': 'critical', 'created_at': '2025-01-01T10:00:00'}
@@ -413,7 +391,6 @@ class TestGetIssueByIndex:
     
     def test_raises_error_for_invalid_index(self, temp_dir):
         """Test that invalid index raises StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Invalid index"):
             get_issue_by_index(0)  # 0 is invalid (1-based)
@@ -423,7 +400,6 @@ class TestGetIssueByIndex:
     
     def test_raises_error_for_out_of_range_index(self, temp_dir):
         """Test that out of range index raises StorageError"""
-        os.chdir(temp_dir)
         
         # Create one issue
         issue = {'id': 'only-one', 'title': 'Only Issue'}
@@ -438,7 +414,6 @@ class TestGetStorageStats:
     
     def test_returns_stats_for_empty_storage(self, temp_dir):
         """Test stats for empty storage"""
-        os.chdir(temp_dir)
         
         stats = get_storage_stats()
         assert isinstance(stats, dict)
@@ -448,7 +423,6 @@ class TestGetStorageStats:
     
     def test_returns_correct_stats_with_issues(self, temp_dir):
         """Test stats calculation with actual issues"""
-        os.chdir(temp_dir)
         
         # Create issues with different severities
         critical_issue = {'id': 'crit', 'title': 'Critical', 'severity': 'critical'}
@@ -469,7 +443,6 @@ class TestGetStorageStats:
     
     def test_handles_storage_errors_gracefully(self, temp_dir):
         """Test that storage errors are handled in stats"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create valid issue
@@ -491,7 +464,6 @@ class TestFileLocking:
     
     def test_file_lock_prevents_concurrent_access(self, temp_dir):
         """Test that file locking prevents concurrent access"""
-        os.chdir(temp_dir)
         test_file = Path('lock_test.json')
         test_file.touch()
         
@@ -533,7 +505,6 @@ class TestAtomicWriteErrorPaths:
     
     def test_atomic_write_invalid_data_type(self, temp_dir):
         """Test that non-dict data raises StorageError"""
-        os.chdir(temp_dir)
         test_file = Path('invalid_data.json')
         
         with pytest.raises(StorageError, match="Data must be a dictionary"):
@@ -545,7 +516,6 @@ class TestAtomicWriteErrorPaths:
     @pytest.mark.skipif(sys.platform.startswith('win'), reason="Permission testing complex on Windows")
     def test_atomic_write_permission_error(self, temp_dir):
         """Test atomic write with permission errors"""
-        os.chdir(temp_dir)
         
         # Create a read-only directory
         readonly_dir = Path('readonly')
@@ -564,7 +534,6 @@ class TestAtomicWriteErrorPaths:
     
     def test_atomic_write_temp_file_cleanup_on_error(self, temp_dir):
         """Test that temp files are cleaned up on errors"""
-        os.chdir(temp_dir)
         
         # Mock os.fdopen to raise an error to trigger cleanup
         with patch('core.storage.os.fdopen', side_effect=OSError("Simulated write error")):
@@ -581,7 +550,6 @@ class TestReadJsonErrorPaths:
     
     def test_read_json_non_dict_structure(self, temp_dir):
         """Test that non-dict JSON raises StorageError"""
-        os.chdir(temp_dir)
         invalid_file = Path('non_dict.json')
         
         # Create JSON file with array instead of dict
@@ -593,7 +561,6 @@ class TestReadJsonErrorPaths:
     
     def test_read_json_general_exception(self, temp_dir):
         """Test general exception handling in read_json_file"""
-        os.chdir(temp_dir)
         
         # Mock open to raise a general exception
         with patch('builtins.open', side_effect=PermissionError("Permission denied")):
@@ -608,7 +575,6 @@ class TestSaveIssueErrorPaths:
     
     def test_save_issue_invalid_data_type(self, temp_dir):
         """Test that non-dict data raises StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Issue data must be a dictionary"):
             save_issue("not a dict")  # type: ignore
@@ -618,7 +584,6 @@ class TestSaveIssueErrorPaths:
     
     def test_save_issue_generates_id_when_missing(self, temp_dir):
         """Test that ID is generated when missing"""
-        os.chdir(temp_dir)
         issue_data = {'title': 'Issue without ID'}
         
         result_id = save_issue(issue_data)
@@ -634,7 +599,6 @@ class TestSaveIssueErrorPaths:
     
     def test_save_issue_general_exception_handling(self, temp_dir):
         """Test general exception handling in save_issue"""
-        os.chdir(temp_dir)
         
         # Mock atomic_write_json to raise a general exception
         with patch('core.storage.atomic_write_json', side_effect=Exception("Unexpected error")):
@@ -649,7 +613,6 @@ class TestLoadIssueErrorPaths:
     
     def test_load_issue_invalid_id_types(self, temp_dir):
         """Test that invalid ID types raise StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Issue ID must be a non-empty string"):
             load_issue("")  # Empty string
@@ -662,7 +625,6 @@ class TestLoadIssueErrorPaths:
     
     def test_load_issue_adds_missing_id_field(self, temp_dir):
         """Test that missing ID field is added during load"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create issue file without ID field
@@ -679,7 +641,6 @@ class TestLoadIssueErrorPaths:
     
     def test_load_issue_general_exception_handling(self, temp_dir):
         """Test general exception handling in load_issue"""
-        os.chdir(temp_dir)
         
         # Create a valid issue first
         save_issue({'id': 'test', 'title': 'Test'})
@@ -695,7 +656,6 @@ class TestListIssuesErrorPaths:
     
     def test_list_issues_with_debug_logging(self, temp_dir):
         """Test debug logging for failed files"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create valid issue
@@ -723,7 +683,6 @@ class TestListIssuesErrorPaths:
     
     def test_list_issues_skips_lock_and_tmp_files(self, temp_dir):
         """Test that lock files and temp files are skipped"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create valid issue
@@ -744,7 +703,6 @@ class TestListIssuesErrorPaths:
     
     def test_list_issues_datetime_parsing_fallback(self, temp_dir):
         """Test datetime parsing fallback for invalid dates"""
-        os.chdir(temp_dir)
         
         # Create issues with various date formats
         issue_valid_date = {
@@ -783,7 +741,6 @@ class TestDeleteIssueErrorPaths:
     
     def test_delete_issue_invalid_id_types(self, temp_dir):
         """Test that invalid ID types raise StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Issue ID must be a non-empty string"):
             delete_issue("")  # Empty string
@@ -796,7 +753,6 @@ class TestDeleteIssueErrorPaths:
     
     def test_delete_issue_backup_disabled(self, temp_dir):
         """Test deletion when backup is disabled"""
-        os.chdir(temp_dir)
         issue_data = {'id': 'no-backup', 'title': 'No Backup Test'}
         save_issue(issue_data)
         
@@ -815,7 +771,6 @@ class TestDeleteIssueErrorPaths:
     
     def test_delete_issue_backup_config_none(self, temp_dir):
         """Test deletion when backup config is None (should default to True)"""
-        os.chdir(temp_dir)
         issue_data = {'id': 'backup-default', 'title': 'Default Backup Test'}
         save_issue(issue_data)
         
@@ -833,7 +788,6 @@ class TestDeleteIssueErrorPaths:
     
     def test_delete_issue_general_exception_handling(self, temp_dir):
         """Test general exception handling in delete_issue"""
-        os.chdir(temp_dir)
         
         # Create a valid issue
         save_issue({'id': 'test', 'title': 'Test'})
@@ -849,7 +803,6 @@ class TestGetIssueByIndexErrorPaths:
     
     def test_get_issue_by_index_non_integer_types(self, temp_dir):
         """Test that non-integer types raise StorageError"""
-        os.chdir(temp_dir)
         
         with pytest.raises(StorageError, match="Invalid index"):
             get_issue_by_index("1")  # type: ignore
@@ -866,7 +819,6 @@ class TestGetStorageStatsErrorPaths:
     
     def test_get_storage_stats_with_general_exception(self, temp_dir):
         """Test stats when general exception occurs"""
-        os.chdir(temp_dir)
         
         # Mock list_issues to raise an exception
         with patch('core.storage.list_issues', side_effect=Exception("Stats error")):
@@ -881,7 +833,6 @@ class TestGetStorageStatsErrorPaths:
     
     def test_get_storage_stats_with_missing_issue_files(self, temp_dir):
         """Test stats calculation when issue files are missing"""
-        os.chdir(temp_dir)
         issues_dir = ensure_issues_directory()
         
         # Create issue data but manually remove the file after
@@ -905,7 +856,6 @@ class TestUnixFileLocking:
     
     def test_file_lock_timeout_behavior(self, temp_dir):
         """Test file lock timeout functionality"""
-        os.chdir(temp_dir)
         test_file = Path('timeout_test.json')
         test_file.touch()
         
@@ -923,7 +873,6 @@ class TestUnixFileLocking:
     
     def test_file_lock_exception_handling(self, temp_dir):
         """Test exception handling in file locking"""
-        os.chdir(temp_dir)
         test_file = Path('exception_test.json')
         
         # Mock fcntl.flock to raise an exception
