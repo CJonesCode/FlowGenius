@@ -134,5 +134,45 @@ class TableStyles:
             "Title": Colors.PRIMARY
         }
 
+# Panel styling configurations
+class PanelStyles:
+    """Centralized panel styling configurations"""
+    
+    @staticmethod
+    def standard():
+        """Standard panel styling for all BugIt panels"""
+        return {
+            "title_align": "left",
+            "border_style": Colors.BRAND,
+            "padding": (1, 2)
+        }
+    
+    @staticmethod
+    def success():
+        """Success panel styling (e.g., completion messages)"""
+        return {
+            "title_align": "left",
+            "border_style": Colors.SUCCESS,
+            "padding": (1, 2)
+        }
+    
+    @staticmethod
+    def error():
+        """Error panel styling (e.g., error messages)"""
+        return {
+            "title_align": "left",
+            "border_style": Colors.ERROR,
+            "padding": (1, 2)
+        }
+    
+    @staticmethod
+    def warning():
+        """Warning panel styling (e.g., deletion confirmations)"""
+        return {
+            "title_align": "left",
+            "border_style": Colors.WARNING,
+            "padding": (1, 2)
+        }
+
 # Export commonly used items
-__all__ = ['Colors', 'Styles', 'TableStyles'] 
+__all__ = ['Colors', 'Styles', 'TableStyles', 'PanelStyles'] 

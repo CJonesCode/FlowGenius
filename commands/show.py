@@ -6,7 +6,7 @@ Supports both UUID and index-based selection.
 import typer
 import json
 from core import storage
-from core.styles import Styles, Colors
+from core.styles import Styles, Colors, PanelStyles
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -81,8 +81,7 @@ def show(
             panel = Panel(
                 content,
                 title=title_text,
-                border_style=Colors.BRAND,
-                padding=(1, 2)
+                **PanelStyles.standard()
             )
             console.print(panel)
         else:

@@ -7,7 +7,12 @@ import typer
 import json
 from typing import Optional
 from core import storage, schema
+from core.styles import Colors, Styles, PanelStyles
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 
+console = Console()
 
 def edit(
     id_or_index: str,
@@ -58,13 +63,13 @@ def edit(
             else:
                 error_msg = f"Invalid severity: {severity}. Must be low, medium, high, or critical."
                 if pretty_output:
-                    typer.echo(error_msg, err=True)
+                    console.print(Styles.error(error_msg))
                 else:
                     output = {
                         "success": False,
                         "error": error_msg
                     }
-                    typer.echo(json.dumps(output, indent=2))
+                    console.print(json.dumps(output, indent=2))
                 raise typer.Exit(1)
         
         # Handle tags
@@ -91,14 +96,14 @@ def edit(
         if not changes_made:
             message = "No changes specified. Use --help to see available options."
             if pretty_output:
-                typer.echo(message)
+                console.print(f"[{Colors.WARNING}]ℹ[/{Colors.WARNING}] {message}")
             else:
                 output = {
                     "success": False,
                     "message": message,
                     "changes": changes_log
                 }
-                typer.echo(json.dumps(output, indent=2))
+                console.print(json.dumps(output, indent=2))
             return
         
         # Validate and save
@@ -106,10 +111,8 @@ def edit(
         storage.save_issue(validated)
         
         if pretty_output:
-            # Human-readable output
-            for change in changes_log:
-                typer.echo(change)
-            typer.echo(f"Issue {issue['id']} updated successfully.")
+            # Display changes in a styled format
+            _display_edit_results(issue, changes_log)
         else:
             # JSON output
             output = {
@@ -118,31 +121,31 @@ def edit(
                 "changes": changes_log,
                 "updated_issue": validated
             }
-            typer.echo(json.dumps(output, indent=2))
+            console.print(json.dumps(output, indent=2))
         
     except storage.StorageError as e:
         # Handle storage-specific errors
         error_msg = str(e)
         if pretty_output:
-            typer.echo(f"Error: {error_msg}", err=True)
+            console.print(Styles.error(f"Error: {error_msg}"))
         else:
             output = {
                 "success": False,
                 "error": error_msg
             }
-            typer.echo(json.dumps(output, indent=2))
+            console.print(json.dumps(output, indent=2))
         raise typer.Exit(1)
     except schema.ValidationError as e:
         # Handle validation errors
         error_msg = f"Validation error: {e}"
         if pretty_output:
-            typer.echo(error_msg, err=True)
+            console.print(Styles.error(error_msg))
         else:
             output = {
                 "success": False,
                 "error": error_msg
             }
-            typer.echo(json.dumps(output, indent=2))
+            console.print(json.dumps(output, indent=2))
         raise typer.Exit(1)
     except typer.Exit:
         # Re-raise typer.Exit to preserve exit codes
@@ -150,11 +153,35 @@ def edit(
     except Exception as e:
         error_msg = f"Unexpected error: {e}"
         if pretty_output:
-            typer.echo(error_msg, err=True)
+            console.print(Styles.error(error_msg))
         else:
             output = {
                 "success": False,
                 "error": error_msg
             }
-            typer.echo(json.dumps(output, indent=2))
-        raise typer.Exit(1) 
+            console.print(json.dumps(output, indent=2))
+        raise typer.Exit(1)
+
+def _display_edit_results(issue: dict, changes_log: list):
+    """Display edit results in a styled panel"""
+    content = Text()
+    
+    # Issue identification
+    content.append("Issue: ", style=Colors.SECONDARY)
+    content.append(issue.get('title', 'No title'), style=Colors.PRIMARY)
+    content.append(f" ({issue['id']})\n\n", style=Colors.IDENTIFIER)
+    
+    # Changes made
+    content.append("Changes Made:\n", style=f"bold {Colors.BRAND}")
+    for change in changes_log:
+        content.append(f"  • {change}\n", style=Colors.SUCCESS)
+    
+    content.append(f"\n[{Colors.SUCCESS}]✓[/{Colors.SUCCESS}] [dim]Issue updated successfully[/dim]")
+    
+    # Display in a styled panel
+    panel = Panel(
+        content,
+        title="Edit Complete",
+        **PanelStyles.success()
+    )
+    console.print(panel) 

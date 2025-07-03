@@ -10,7 +10,13 @@ import os
 from typing import Optional
 from pathlib import Path
 from core import config as config_core
+from core.styles import Colors, Styles, PanelStyles
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
+console = Console()
 
 def config(
     get: Optional[str] = typer.Option(None, "-g", "--get", help="Get a config value"),
@@ -34,23 +40,35 @@ def config(
         # Set API key persistently to .env file
         if set_api_key:
             if not value:
-                typer.echo("API key value is required when using --set-api-key", err=True)
-                typer.echo("Example: bugit config --set-api-key openai sk-your-key", err=True)
+                if pretty_output:
+                    console.print(Styles.error("API key value is required when using --set-api-key"))
+                    console.print(f"[{Colors.SECONDARY}]Example:[/{Colors.SECONDARY}] [bold]bugit config --set-api-key openai sk-your-key[/bold]")
+                else:
+                    console.print(json.dumps({"success": False, "error": "API key value is required when using --set-api-key"}))
                 raise typer.Exit(1)
             
             try:
                 config_core.set_api_key(set_api_key, value)
-                typer.echo(f"API key for {set_api_key} set successfully")
-                typer.echo(f"Saved to .env file for future sessions")
+                if pretty_output:
+                    console.print(Styles.success(f"API key for {set_api_key} set successfully"))
+                    console.print(f"[{Colors.SUCCESS}]✓[/{Colors.SUCCESS}] [dim]Saved to .env file for future sessions[/dim]")
+                else:
+                    console.print(json.dumps({"success": True, "provider": set_api_key, "message": "API key set successfully"}))
             except config_core.ConfigError as e:
-                typer.echo(f"Error: {e}", err=True)
+                if pretty_output:
+                    console.print(Styles.error(f"Error: {e}"))
+                else:
+                    console.print(json.dumps({"success": False, "error": str(e)}))
                 raise typer.Exit(1)
             return
         
         # Import preferences from file
         if import_file:
             if not import_file.exists():
-                typer.echo(f"File not found: {import_file}", err=True)
+                if pretty_output:
+                    console.print(Styles.error(f"File not found: {import_file}"))
+                else:
+                    console.print(json.dumps({"success": False, "error": f"File not found: {import_file}"}))
                 raise typer.Exit(1)
             
             with open(import_file, 'r') as f:
@@ -58,7 +76,10 @@ def config(
             
             # Save preferences (automatically excludes API keys)
             config_core.save_preferences(new_preferences)
-            typer.echo(f"Preferences imported from {import_file}")
+            if pretty_output:
+                console.print(Styles.success(f"Preferences imported from {import_file}"))
+            else:
+                console.print(json.dumps({"success": True, "imported_from": str(import_file)}))
             return
         
         # Load current config
@@ -72,7 +93,10 @@ def config(
             }
             with open(export_file, 'w') as f:
                 json.dump(safe_preferences, f, indent=2)
-            typer.echo(f"Preferences exported to {export_file}")
+            if pretty_output:
+                console.print(Styles.success(f"Preferences exported to {export_file}"))
+            else:
+                console.print(json.dumps({"success": True, "exported_to": str(export_file)}))
             return
         
         # Get specific config value
@@ -81,7 +105,7 @@ def config(
             if get == 'api_key':
                 get = 'openai_api_key'
                 if pretty_output:
-                    typer.echo("[INFO] 'api_key' is now 'openai_api_key' for clarity")
+                    console.print(f"[{Colors.WARNING}]INFO:[/{Colors.WARNING}] 'api_key' is now 'openai_api_key' for clarity")
             
             if get in current_config:
                 value_result = current_config[get]
@@ -93,13 +117,13 @@ def config(
                             # Mask API key for security
                             masked = value_result[:8] + "*" * (len(value_result) - 8) if len(value_result) > 8 else "***"
                             source = "(.env file)" if Path('.env').exists() else "(environment)"
-                            typer.echo(f"{get}: {masked} {source}")
+                            console.print(f"[{Colors.SECONDARY}]{get}:[/{Colors.SECONDARY}] [{Colors.IDENTIFIER}]{masked}[/{Colors.IDENTIFIER}] [dim]{source}[/dim]")
                         else:
                             provider = get.replace('_api_key', '')
-                            typer.echo(f"{get}: Not set")
-                            typer.echo(f"Set with: bugit config --set-api-key {provider} <your-key>")
+                            console.print(f"[{Colors.SECONDARY}]{get}:[/{Colors.SECONDARY}] [{Colors.ERROR}]Not set[/{Colors.ERROR}]")
+                            console.print(f"[{Colors.SECONDARY}]Set with:[/{Colors.SECONDARY}] [bold]bugit config --set-api-key {provider} <your-key>[/bold]")
                     else:
-                        typer.echo(f"{get}: {value_result}")
+                        console.print(f"[{Colors.SECONDARY}]{get}:[/{Colors.SECONDARY}] [{Colors.PRIMARY}]{value_result}[/{Colors.PRIMARY}]")
                 else:
                     # JSON output
                     output_value = value_result
@@ -112,10 +136,10 @@ def config(
                         "value": output_value,
                         "set": bool(value_result) if get.endswith('_api_key') else True
                     }
-                    typer.echo(json.dumps(output, indent=2))
+                    console.print(json.dumps(output, indent=2))
             else:
                 if pretty_output:
-                    typer.echo(f"Config key '{get}' not found.")
+                    console.print(Styles.error(f"Config key '{get}' not found."))
                 else:
                     output = {
                         "key": get,
@@ -123,65 +147,44 @@ def config(
                         "set": False,
                         "error": "Key not found"
                     }
-                    typer.echo(json.dumps(output, indent=2))
+                    console.print(json.dumps(output, indent=2))
             return
         
         # Set config value
         if set_key:
             if not value:
-                typer.echo("Value is required when using --set", err=True)
+                if pretty_output:
+                    console.print(Styles.error("Value is required when using --set"))
+                else:
+                    console.print(json.dumps({"success": False, "error": "Value is required when using --set"}))
                 raise typer.Exit(1)
             
             # Handle legacy 'api_key' setting attempt
             if set_key == 'api_key':
-                typer.echo("Error: Use '--set-api-key openai <key>' instead of '--set api_key'", err=True)
-                typer.echo("Example: bugit config --set-api-key openai sk-your-key", err=True)
+                if pretty_output:
+                    console.print(Styles.error("Use '--set-api-key openai <key>' instead of '--set api_key'"))
+                    console.print(f"[{Colors.SECONDARY}]Example:[/{Colors.SECONDARY}] [bold]bugit config --set-api-key openai sk-your-key[/bold]")
+                else:
+                    console.print(json.dumps({"success": False, "error": "Use '--set-api-key openai <key>' instead of '--set api_key'"}))
                 raise typer.Exit(1)
             
             try:
                 config_core.set_preference(set_key, value)
-                typer.echo(f"Set {set_key}: {value}")
+                if pretty_output:
+                    console.print(Styles.success(f"Set {set_key}: {value}"))
+                else:
+                    console.print(json.dumps({"success": True, "key": set_key, "value": value}))
             except config_core.ConfigError as e:
-                typer.echo(f"Error: {e}", err=True)
+                if pretty_output:
+                    console.print(Styles.error(f"Error: {e}"))
+                else:
+                    console.print(json.dumps({"success": False, "error": str(e)}))
                 raise typer.Exit(1)
             return
         
         # Show all config (default behavior)
         if pretty_output:
-            # Human-readable output with helpful information
-            typer.echo("Current configuration:")
-            typer.echo()
-            
-            # Show OpenAI API key status
-            if config_core.check_openai_api_key():
-                api_key = current_config.get('openai_api_key', '')
-                masked = api_key[:8] + "*" * (len(api_key) - 8) if len(api_key) > 8 else "***"
-                source = "(.env file)" if Path('.env').exists() else "(environment)"
-                typer.echo(f"  openai_api_key: {masked} {source}")
-            else:
-                typer.echo(f"  openai_api_key: Not set")
-                typer.echo(f"     Set with: bugit config --set-api-key openai <your-key>")
-            
-            # Future: Show other provider API keys here
-            # typer.echo(f"  anthropic_api_key: {masked if anthropic_key else 'Not set'}")
-            # typer.echo(f"  google_api_key: {masked if google_key else 'Not set'}")
-            
-            typer.echo()
-            typer.echo("Preferences:")
-            
-            # Show preferences
-            for key, val in current_config.items():
-                if not key.endswith('_api_key'):
-                    # Only API keys use environment variables, preferences come from .bugitrc or defaults
-                    source = " (from .bugitrc)" if Path('.bugitrc').exists() else " (default)"
-                    typer.echo(f"  {key}: {val}{source}")
-            
-            # Show helpful hints
-            typer.echo()
-            typer.echo("Helpful commands:")
-            typer.echo("   bugit config --set-api-key openai <key>   # Set OpenAI API key")
-            typer.echo("   bugit config --set model gpt-4            # Set model preference")
-            typer.echo("   bugit config --export config.json        # Export preferences")
+            _display_config_pretty(current_config)
         else:
             # JSON output for scripting (default)
             output_config = current_config.copy()
@@ -191,11 +194,77 @@ def config(
                 if key.endswith('_api_key') and output_config[key]:
                     output_config[key] = output_config[key][:8] + "*" * (len(output_config[key]) - 8) if len(output_config[key]) > 8 else "***"
             
-            typer.echo(json.dumps(output_config, indent=2))
+            console.print(json.dumps(output_config, indent=2))
                 
     except typer.Exit:
         # Re-raise typer.Exit to preserve exit codes
         raise
     except Exception as e:
-        typer.echo(f"Error managing config: {e}", err=True)
-        raise typer.Exit(1) 
+        if pretty_output:
+            console.print(Styles.error(f"Error managing config: {e}"))
+        else:
+            console.print(json.dumps({"success": False, "error": str(e)}))
+        raise typer.Exit(1)
+
+def _display_config_pretty(current_config: dict):
+    """Display configuration in a beautifully formatted panel"""
+    content = Text()
+    
+    # API Keys section
+    content.append("API Keys:\n", style=f"bold {Colors.BRAND}")
+    
+    # OpenAI API key
+    if config_core.check_openai_api_key():
+        api_key = current_config.get('openai_api_key', '')
+        masked = api_key[:8] + "*" * (len(api_key) - 8) if len(api_key) > 8 else "***"
+        source = "(.env file)" if Path('.env').exists() else "(environment)"
+        content.append("  openai_api_key: ", style=Colors.SECONDARY)
+        content.append(masked, style=Colors.IDENTIFIER)
+        content.append(f" {source}\n", style="dim")
+    else:
+        content.append("  openai_api_key: ", style=Colors.SECONDARY)
+        content.append("Not set", style=Colors.ERROR)
+        content.append("\n")
+        content.append("     Set with: ", style=Colors.SECONDARY)
+        content.append("bugit config --set-api-key openai <your-key>\n", style="bold")
+    
+    # Future API keys can be added here
+    content.append("\n")
+    
+    # Preferences section
+    content.append("Preferences:\n", style=f"bold {Colors.BRAND}")
+    
+    preferences_found = False
+    for key, val in current_config.items():
+        if not key.endswith('_api_key'):
+            preferences_found = True
+            source = " (from .bugitrc)" if Path('.bugitrc').exists() else " (default)"
+            content.append(f"  {key}: ", style=Colors.SECONDARY)
+            content.append(str(val), style=Colors.PRIMARY)
+            content.append(f"{source}\n", style="dim")
+    
+    if not preferences_found:
+        content.append("  No custom preferences set\n", style=Colors.SECONDARY)
+    
+    content.append("\n")
+    
+    # Helpful commands section
+    content.append("Quick Commands:\n", style=f"bold {Colors.BRAND}")
+    commands = [
+        ("Set OpenAI API key", "bugit config --set-api-key openai <key>"),
+        ("Set model preference", "bugit config --set model gpt-4"),
+        ("Export preferences", "bugit config --export config.json"),
+        ("Import preferences", "bugit config --import config.json"),
+    ]
+    
+    for description, command in commands:
+        content.append(f"  {description}: ", style=Colors.SECONDARY)
+        content.append(f"{command}\n", style=Colors.INTERACTIVE)
+    
+    # Display in a styled panel
+    panel = Panel(
+        content,
+        title="BugIt Configuration",
+        **PanelStyles.standard()
+    )
+    console.print(panel) 
