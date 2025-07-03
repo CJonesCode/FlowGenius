@@ -10,38 +10,106 @@ BugIt is a CLI-first tool that enables developers to quickly capture unstructure
 
 **Current Implementation:** All 6 core commands are functional with **real LangGraph integration** using OpenAI API and **production file operations** with atomic writes. The CLI offers JSON output by default (perfect for automation) with optional `--pretty` flag for human-readable formatting. Features include retry logic, structured error handling, cross-platform file locking, and professional clean output.
 
-## Features
+## Interface Options
 
-### Core Commands ✅ Implemented
-- `bugit new` - Create a new bug report from freeform description
-- `bugit list` - List existing issues with filtering options  
-- `bugit show` - Display detailed information about a specific issue
-- `bugit edit` - Modify existing bug reports
-- `bugit delete` - Remove bug reports permanently
-- `bugit config` - Manage configuration settings
+BugIt provides **two distinct interfaces** optimized for different use cases:
 
-### Production Capabilities ✅
-- **Real AI Processing**: OpenAI API integration via LangGraph framework
-- **Atomic File Operations**: Write-then-rename pattern prevents partial writes
-- **Cross-Platform File Locking**: Concurrent access safety (full on Unix, simplified on Windows)
-- **Real Filesystem Persistence**: Issues stored as individual JSON files
-- **JSON-First Output**: Default JSON format perfect for automation and scripting
-- **Pretty Human Output**: Clean, professional formatting with `--pretty` flag
-- **Dynamic Index Management**: Runtime index generation with proper sorting
-- **Retry Logic**: Configurable retry attempts (default: 3) with error recovery
-- **Secure Configuration**: API keys stored in `.env` file (git-ignored)
-- **Multi-Provider Ready**: Architecture supports OpenAI, Anthropic, and Google APIs
-- **World-Class Testing**: 96% test coverage with 447 passing tests
-- **Production Error Handling**: Structured error responses for automation
-- **Data Safety**: Optional backup on delete, corrupted file handling
+### 1. **Direct CLI Mode** (`python cli.py`) - Automation-First
+Perfect for scripting, CI/CD, and automation workflows:
+- **Default Output**: JSON format ideal for automation
+- **Usage**: `python cli.py <command> [options]`
+- **Best For**: Scripts, automation, CI/CD pipelines
+
+### 2. **Interactive Shell Mode** (`python bugit.py`) - Human-First  
+Perfect for interactive development workflows:
+- **Default Output**: Pretty formatted output for humans
+- **Usage**: `python bugit.py` then interactive commands
+- **Best For**: Interactive development, exploring issues
+
+## Current Feature Status
+
+### **✅ IMPLEMENTED FEATURES**
+
+| **Feature Category** | **Feature** | **Status** | **Notes** |
+|---------------------|-------------|------------|-----------|
+| **Core Commands** | | | |
+| | `bugit new` | ✅ Complete | AI-powered bug creation with OpenAI API |
+| | `bugit list` | ✅ Complete | Filtering, sorting, JSON/pretty output |
+| | `bugit show` | ✅ Complete | Detailed issue display |
+| | `bugit edit` | ✅ Complete | Full field editing capabilities |
+| | `bugit delete` | ✅ Complete | Atomic deletion with backup |
+| | `bugit config` | ✅ Complete | Configuration management |
+| **AI Integration** | | | |
+| | LangGraph framework | ✅ Complete | Real OpenAI API integration |
+| | OpenAI API | ✅ Complete | GPT-4 processing with retry logic |
+| | Structured output | ✅ Complete | Pydantic validation models |
+| | Retry logic | ✅ Complete | Configurable retry attempts |
+| | Multi-provider ready | 🔄 Architecture | Anthropic/Google support planned |
+| **Storage & Persistence** | | | |
+| | Atomic file operations | ✅ Complete | Write-then-rename pattern |
+| | Cross-platform locking | ⚠️ Partial | Unix full, Windows simplified |
+| | JSON file storage | ✅ Complete | Individual files per issue |
+| | Dynamic indexing | ✅ Complete | Runtime index generation |
+| | Corrupted file handling | ✅ Complete | Graceful error handling |
+| | Backup on delete | ✅ Complete | Optional backup system |
+| **User Interface** | | | |
+| | Direct CLI mode | ✅ Complete | JSON-first for automation |
+| | Interactive shell | ✅ Complete | Human-friendly interface |
+| | JSON output | ✅ Complete | Default for automation |
+| | Pretty output | ✅ Complete | Rich formatting |
+| | Short flags | ✅ Complete | `-p`, `-s`, `-t`, `-f`, etc. |
+| | Professional styling | ✅ Complete | Consistent color scheme |
+| **Configuration** | | | |
+| | API key management | ✅ Complete | Secure `.env` storage |
+| | User preferences | ✅ Complete | `.bugitrc` file |
+| | Multi-provider config | ✅ Complete | OpenAI, Anthropic, Google ready |
+| | Environment variables | ✅ Complete | API key support |
+| | Import/export | ✅ Complete | JSON file operations |
+| **Testing & Quality** | | | |
+| | Comprehensive test suite | ✅ Complete | 19 test files with extensive coverage |
+| | Unit & integration tests | ✅ Complete | Professional test infrastructure |
+| | Performance benchmarks | ✅ Complete | Scalability testing |
+| | Mock infrastructure | ✅ Complete | No external dependencies |
+| **Security & Safety** | | | |
+| | Secure API key storage | ✅ Complete | Git-ignored `.env` file |
+| | Input validation | ✅ Complete | Pydantic models |
+| | Error handling | ✅ Complete | Structured exceptions |
+| | Data validation | ✅ Complete | Type checking |
+
+### **🔄 PLANNED FEATURES (Phase 4)**
+
+| **Feature Category** | **Feature** | **Status** | **Notes** |
+|---------------------|-------------|------------|-----------|
+| **Advanced Features** | | | |
+| | Archive functionality | 🔄 Planned | Manual `bugit archive` command |
+| | Duplicate detection | 🔄 Planned | Embedding-based similarity |
+| | Custom sorting | 🔄 Planned | Advanced list options |
+| | Performance optimization | 🔄 Planned | Large dataset handling |
+| | Enhanced caching | 🔄 Planned | Memory optimization |
+| **External Integrations** | | | |
+| | GitHub integration | 🔄 Planned | Issue sync |
+| | Notion integration | 🔄 Planned | Database sync |
+| | Linear integration | 🔄 Planned | Project management |
+| | Markdown export | 🔄 Planned | Human-readable reports |
+| | Screenshot support | 🔄 Planned | Media attachments |
+| **Workflow Features** | | | |
+| | Schema migration | 🔄 Planned | Version compatibility |
+| | MCP interface | 🔄 Planned | GUI/Cursor integration |
+| | Embedding clustering | 🔄 Planned | AI-powered grouping |
+| | Async operations | 🔄 Planned | Concurrent processing |
+
+**Legend:**
+- ✅ **Complete**: Fully implemented and working
+- ⚠️ **Partial**: Implemented but with known limitations
+- 🔄 **Planned**: Architecture ready but not implemented
 
 ## Setup
 
 ### Prerequisites
 
-- Python 3.9 or higher
-- pip or poetry for dependency management
-- OpenAI API key for real AI processing
+- Python 3.9 or higher (tested with Python 3.13)
+- pip for dependency management
+- OpenAI API key for AI processing
 
 ### Installation
 
@@ -102,67 +170,57 @@ BUGIT_GOOGLE_API_KEY=your-google-key-here         # Future support
 }
 ```
 
-**Environment Variables (API Keys Only):**
-```bash
-# Only API keys use environment variables
-export BUGIT_OPENAI_API_KEY=sk-your-key-here
-export BUGIT_ANTHROPIC_API_KEY=sk-ant-your-key-here  # Future
-export BUGIT_GOOGLE_API_KEY=your-google-key-here     # Future
-
-# Configuration does NOT use environment variables - use .bugitrc instead
-```
-
-**Legacy Support:**
-- `BUGIT_API_KEY` environment variable still supported with deprecation warning
-
 ## Usage
 
-### CLI vs Interactive Shell
+### Direct CLI Mode (Automation-First)
 
-BugIt provides two distinct experiences optimized for different use cases:
-
-#### 1. Direct CLI Usage (Automation-First)
 Perfect for scripting, CI/CD, and automation:
-```bash
-# JSON output by default (perfect for automation)
-python cli.py new "Critical login bug"
-python cli.py list | jq '.[] | select(.severity == "critical")'
 
-# Pretty output when needed
-python cli.py list --pretty
-python cli.py new "Bug description" -p
+```bash
+# Create new issues - JSON output by default
+python cli.py new "Critical login bug"
+python cli.py new "UI button alignment issue" --pretty  # Human-readable
+
+# List and filter issues
+python cli.py list                                     # JSON array
+python cli.py list --pretty                           # Pretty table
+python cli.py list --severity critical | jq '.[] | .id'  # Automation
+
+# Show issue details
+python cli.py show 1                                   # JSON object
+python cli.py show abc123 --pretty                    # Pretty panel
+
+# Edit and delete issues
+python cli.py edit 1 --severity high --add-tag urgent
+python cli.py delete 1 --force                        # Skip confirmation
+
+# Configuration
+python cli.py config                                   # JSON object
+python cli.py config --pretty                         # Pretty display
+python cli.py config --get model                      # Get specific value
 ```
 
-#### 2. Interactive Shell (Human-First)  
-Perfect for interactive use by developers:
+### Interactive Shell Mode (Human-First)
+
+Perfect for interactive development workflows:
+
 ```bash
-# Start the interactive shell
+# Start interactive shell
 python bugit.py
 
-# Pretty output by default (human-friendly)
-BugIt> list
-BugIt> new "Bug description"
+# Interactive commands (pretty output by default)
+BugIt> new "Bug description"                    # Pretty confirmation
+BugIt> list                                     # Pretty table
+BugIt> show 1                                   # Pretty panel
+BugIt> edit 1 --severity high                   # Pretty feedback
+BugIt> delete 1                                 # Interactive confirmation
 
-# JSON output when needed (both flags work)
-BugIt> list -p
-BugIt> list --pretty
-BugIt> new "Bug description" -p
-BugIt> new "Bug description" --pretty
+# Get JSON when needed for automation
+BugIt> list --pretty                            # JSON output
+BugIt> config --pretty                          # JSON for backup
 ```
 
-### CLI Output Formats
-
-**Direct CLI Mode (Automation-First):**
-- **Default**: JSON output perfect for scripting
-- **`--pretty` or `-p`**: Human-readable output
-
-**Interactive Shell Mode (Human-First):**
-- **Default**: Pretty output perfect for humans  
-- **`-p` or `--pretty` flag**: JSON output for copy-paste into automation
-
 ### Short Flags for Power Users
-
-BugIt supports convenient short flags for commonly used options:
 
 | Short Flag | Long Flag | Used In | Description |
 |------------|-----------|---------|-------------|
@@ -176,133 +234,38 @@ BugIt supports convenient short flags for commonly used options:
 
 **Examples:**
 ```bash
-# These are equivalent
-python cli.py list --severity critical --pretty
-python cli.py list -s critical -p
+# Direct CLI with short flags
+python cli.py list -s critical -p              # Filter critical, pretty output
+python cli.py edit 1 -a urgent -p              # Add tag, pretty output
+python cli.py config -g model -p               # Get model setting
 
-# These are equivalent  
-python cli.py edit 1 --add-tag urgent --pretty
-python cli.py edit 1 -a urgent -p
-
-# These are equivalent
-python cli.py config --get model --pretty
-python cli.py config -g model -p
-```
-
-### Create a new bug report
-```bash
-# JSON output (default)
-python cli.py new "The logout button doesn't work on mobile devices"
-
-# Pretty output for humans (using short flag)
-python cli.py new "The logout button doesn't work on mobile devices" -p
-```
-
-### List all issues
-```bash
-# JSON array (default)
-python cli.py list
-
-# Pretty table for humans (using short flag)
-python cli.py list -p
-```
-
-### Filter issues  
-```bash
-# Using long flags
-python cli.py list --severity critical --pretty
-
-# Using short flags for faster typing
-python cli.py list -s critical -p
-python cli.py list -t auth -p
-```
-
-### Show issue details
-```bash
-# JSON object (default)
-python cli.py show abc123      # By UUID
-python cli.py show 1           # By index from list
-
-# Pretty panel for humans (using short flag)
-python cli.py show 1 -p
-```
-
-### Edit an issue
-```bash
-# JSON response (default)
-python cli.py edit abc123 --severity high
-
-# Using short flags for efficiency
-python cli.py edit 1 -s high -a urgent -p
-python cli.py edit abc123 --title "New title" -p
-```
-
-### Delete an issue
-```bash
-# JSON mode requires --force flag for safety (using short flag)
-python cli.py delete abc123 -f
-
-# Pretty mode has interactive confirmation
-python cli.py delete 1 -p
-```
-
-### Manage configuration
-```bash
-python cli.py config                                      # JSON object (default)
-python cli.py config -p                                   # Pretty formatted display (short flag)
-python cli.py config -g model                             # Get specific value (short flag)
-python cli.py config --set model gpt-4                    # Set value
-python cli.py config --set-api-key openai sk-...          # Set API key securely
-python cli.py config --export config.json                 # Export to file
+# Interactive shell with short flags
+BugIt> list -s high                            # Filter high severity
+BugIt> edit 1 -r old-tag                       # Remove tag
 ```
 
 ## Automation Examples
 
-### Scripting with Direct CLI (Automation-First)
-
-The JSON-first output makes BugIt perfect for automation:
-
+### JSON-First Automation
 ```bash
-# Extract issue IDs for processing (CLI mode - JSON by default)
+# Extract issue IDs for batch processing
 python cli.py list | jq -r '.[].id'
 
-# Filter critical issues (CLI mode)
+# Filter and process critical issues
 python cli.py list --severity critical | jq '.[] | select(.severity == "critical")'
-python cli.py list -s critical | jq '.[] | select(.severity == "critical")'
 
-# Create issue and get ID for follow-up (CLI mode)
-ISSUE_ID=$(python cli.py new "Critical bug" | jq -r '.issue.id')
-python cli.py edit $ISSUE_ID -a urgent
+# Create issue and get ID for follow-up
+ISSUE_ID=$(python cli.py new "Critical bug" | jq -r '.id')
+python cli.py edit $ISSUE_ID --add-tag urgent
 
-# Batch process issues by severity (CLI mode with short flags)
+# Batch process issues
 python cli.py list -s critical | jq -r '.[] | .id' | \
   while read id; do
-    python cli.py edit $id -a needs-review
+    python cli.py edit $id --add-tag needs-review
   done
 ```
 
-### Interactive Shell Workflow (Human-First)
-
-The shell provides a human-friendly experience:
-
-```bash
-# Start interactive shell
-python bugit.py
-
-# Inside shell - pretty output by default
-BugIt> list                    # Shows nice table
-BugIt> list -s critical        # Filtered pretty table
-BugIt> new "Bug description"   # Pretty confirmation
-BugIt> edit 1 -s high          # Pretty edit feedback
-
-# Get JSON when needed for automation
-BugIt> list -p | jq '.[] | .id'      # Copy-paste to scripts
-BugIt> list --pretty | jq '.[] | .id' # Both flags work the same
-BugIt> config -p                     # JSON config for backup
-```
-
-### Mixed Workflow Examples
-
+### Mixed Workflow
 ```bash
 # CLI for automation tasks
 python cli.py list -s critical | jq -r '.[] | .id' > critical_issues.txt
@@ -315,28 +278,30 @@ BugIt> exit
 
 # Back to CLI for batch processing
 cat critical_issues.txt | while read id; do
-  python cli.py edit $id -a processed
+  python cli.py edit $id --add-tag processed
 done
 ```
 
-## Development
+## Development & Testing
 
 ### Running Tests
 
 ```bash
-# Run all tests (447 tests passing, 96% coverage)
+# Run all tests
 pytest
 
 # Run with coverage  
 pytest --cov=. --cov-report=html
 
 # View coverage report
-open htmlcov/index.html
+open htmlcov/index.html  # macOS/Linux
+start htmlcov/index.html # Windows
 
-# Run specific test suites
-pytest tests/test_basic.py          # Infrastructure tests
-pytest tests/test_commands_*.py     # Command-specific tests  
-pytest tests/test_core_*.py         # Core module tests
+# Run specific test categories
+pytest tests/test_basic.py              # Infrastructure tests
+pytest tests/test_commands_*.py         # Command-specific tests  
+pytest tests/test_core_*.py             # Core module tests
+pytest tests/test_integration.py        # End-to-end tests
 ```
 
 ### Code Quality
@@ -352,175 +317,35 @@ isort .
 mypy .
 ```
 
-### Project Structure
+### Testing the Implementation
 
-```
-BugIt/
-├── cli.py                 # Main CLI entry point
-├── commands/              # CLI command implementations
-│   ├── new.py            # Create new issues
-│   ├── list.py           # List and filter issues  
-│   ├── show.py           # Show issue details
-│   ├── edit.py           # Edit existing issues
-│   ├── delete.py         # Delete issues
-│   └── config.py         # Configuration management
-├── core/                  # Core business logic
-│   ├── storage.py         # Production file operations with atomic writes
-│   ├── schema.py          # Data validation and defaults
-│   ├── model.py           # Real LangGraph integration
-│   └── config.py          # Configuration management
-├── tests/                 # Test suite (447 tests, 96% coverage)
-│   ├── conftest.py        # Test fixtures
-│   ├── test_basic.py      # Infrastructure tests
-│   ├── test_commands_*.py # Command-specific tests
-│   ├── test_core_*.py     # Core module tests
-│   ├── test_integration.py # End-to-end workflow tests
-│   └── test_performance.py # Performance benchmarks
-├── .bugit/               # Runtime directory (auto-created)
-│   ├── issues/           # Issue storage (JSON files)
-│   └── backups/          # Optional backup storage
-├── .env                  # API keys (git-ignored, auto-created)
-├── .bugitrc              # User preferences
-└── requirements.txt      # Dependencies
-```
-
-## Current Implementation Status
-
-### ✅ Phase 0: Environment Setup - COMPLETE
-- Python virtual environment with all dependencies
-- Project structure with proper module organization
-- Requirements management and version control
-- Comprehensive .gitignore with security patterns
-
-### ✅ Phase 1: Enhanced Stubs Implementation - COMPLETE  
-- All 6 CLI commands implemented and fully functional
-- Enhanced stub system with intelligent keyword-based processing
-- Production CLI experience with Rich formatting and proper error handling
-- Comprehensive testing with 9/9 tests passing
-- Secure configuration with .env file API key management
-- Multi-provider architecture ready for future AI service expansion
-
-### ✅ Phase 2: Real LangGraph Integration - COMPLETE
-- **Real OpenAI API integration** via LangGraph framework
-- **Retry logic with configurable attempts** (default: 3)
-- **Structured output validation** with Pydantic models
-- **JSON-first output format** perfect for automation and scripting
-- **Professional clean output** without emojis
-- **Comprehensive error handling** with structured responses
-- **World-class testing** with 96% coverage and 447 passing tests
-
-### ✅ Phase 3: Production File Operations - COMPLETE
-- **Atomic file operations** with write-then-rename pattern
-- **Cross-platform file locking** for concurrent access safety (full on Unix, simplified on Windows)
-- **Real filesystem persistence** with individual JSON files replacing all mock storage
-- **Dynamic index management** with runtime generation and proper sorting
-- **Production error handling** with StorageError hierarchy and structured responses
-- **Data safety features**: Optional backup on delete, corrupted file handling
-- **Storage statistics** and monitoring capabilities for debugging
-- **Enhanced command integration** using new storage functions
-
-### What Works Right Now:
-- ✅ **Complete CLI interface** with dual output modes (JSON/pretty)
-- ✅ **Real AI processing** with OpenAI API integration
-- ✅ **Production file operations** with atomic writes and file locking
-- ✅ **Automation-ready** JSON output for scripting and CI/CD
-- ✅ **Human-friendly** pretty output for interactive use
-- ✅ **Data persistence** with real JSON files stored in `.bugit/issues/`
-- ✅ **Concurrent access safety** with cross-platform file locking
-- ✅ **Production error handling** with retry logic and structured responses
-- ✅ **Full command functionality** (new, list, show, edit, delete, config)
-- ✅ **Secure API key management** with automatic .env file creation
-- ✅ **Multi-provider support** architecture for future AI service expansion
-- ✅ **World-class testing** with 96% coverage, 447 tests, real AI integration
-
-### 🔄 Phase 4: Advanced Features & Polish - NEXT
-- Performance optimization for large issue lists (100+ issues)
-- Advanced caching mechanisms for efficient operations
-- Enhanced Windows file locking implementation
-- Advanced filtering and search capabilities
-- Integration with external tools (GitHub, Notion, Linear)
-- Custom sorting and archiving features
-- Duplicate detection and similarity analysis
-
-## Testing the Current Implementation
-
-You can fully test all functionality with the current production implementation:
+Test all functionality with real AI processing and file persistence:
 
 ```bash
-# Create sample issues (real AI processing with file persistence)
+# Create sample issues (real AI + file operations)
 python cli.py new "Critical login bug: users can't authenticate"
-python cli.py new "Minor UI issue with button alignment" -p
-python cli.py new "Camera crash when switching modes"
+python cli.py new "Minor UI issue with button alignment" --pretty
 
-# List issues - JSON for automation
+# List and filter issues
 python cli.py list | jq '.[] | select(.severity == "critical")'
+python cli.py list --pretty                    # Pretty table
+python cli.py list --severity critical --pretty
 
-# List issues - pretty table for humans (short flag)
-python cli.py list -p
+# Show detailed information
+python cli.py show 1 --pretty                  # Pretty panel
+python cli.py show abc123                      # JSON object
 
-# Filter by severity or tags (short flags for efficiency)
-python cli.py list -s critical -p
-python cli.py list -t auth
+# Edit with AI validation
+python cli.py edit 1 --severity low --add-tag ui --pretty
 
-# Show detailed issue information (reads from actual files)
-python cli.py show 1 -p              # Pretty panel (short flag)
-python cli.py show abc123            # JSON object
+# Delete with backup
+python cli.py delete 2 --force
 
-# Edit issues with real AI validation (atomic file updates, short flags)
-python cli.py edit 1 -s low -a ui -p
-
-# Delete issues with backup (atomic file operations, short flag)
-python cli.py delete 2 -f
-
-# Configuration management (short flags)
+# Configuration management
 python cli.py config --set model gpt-3.5-turbo
-python cli.py config --set-api-key openai sk-your-key-here
-python cli.py config -g model -p
+python cli.py config --get model --pretty
 python cli.py config --export backup.json
-
-# Check storage statistics
-python -c "from core.storage import get_storage_stats; import json; print(json.dumps(get_storage_stats(), indent=2))"
 ```
-
-## Architecture Highlights
-
-### Real AI Integration
-- **LangGraph Framework**: Production-ready AI processing pipeline
-- **OpenAI API**: Real AI-powered bug analysis and categorization
-- **Retry Logic**: Robust error handling with configurable retry attempts
-- **Structured Validation**: Pydantic models ensure consistent AI output
-
-### Production File Operations
-- **Atomic Writes**: Write-then-rename pattern prevents partial writes and data corruption
-- **Cross-Platform Locking**: Concurrent access safety on Unix and Windows
-- **Real Persistence**: Individual JSON files in `.bugit/issues/` directory
-- **Data Safety**: Optional backup on delete, graceful handling of corrupted files
-- **Error Handling**: Comprehensive StorageError hierarchy for structured responses
-
-### Automation-First Design
-- **JSON by Default**: Perfect for scripting, CI/CD, and automation workflows
-- **Pretty Flag**: Human-readable output when needed
-- **Consistent Interface**: All commands support both output modes
-- **Safety Features**: Destructive operations require explicit confirmation in JSON mode
-
-### Security-First Design
-- API keys never stored in version control (.env file auto-created)
-- Clear separation between secrets (.env) and preferences (.bugitrc)
-- API key environment variables for deployment flexibility (NO configuration overrides)
-
-### Production Quality CLI
-- Rich library integration for beautiful terminal output
-- Comprehensive error handling with structured responses
-- Full scriptability with no interactive prompts required
-- Proper exit codes and error propagation
-
-### Testing & Quality
-- **96% test coverage** with 447 passing tests
-- **Systematic test enhancement** covering all major code paths
-- **Real AI integration testing** with OpenAI API validation
-- **Production file operations** testing with atomic writes and concurrency
-- **Comprehensive error handling** coverage including edge cases
-- **Performance benchmarks** and integration testing
 
 ## File Storage Structure
 
@@ -551,25 +376,30 @@ Each issue file contains:
 }
 ```
 
+## Backup vs Archive
+
+### **🛡️ Backup (✅ Implemented)**
+- **Purpose**: Data safety and recovery
+- **Trigger**: Automatic on delete
+- **Location**: `.bugit/backups/`
+- **Content**: Exact copy of deleted issue
+- **Use**: Recovery from accidental deletion
+
+### **📁 Archive (🔄 Planned)**
+- **Purpose**: Workflow management
+- **Trigger**: Manual `bugit archive` command
+- **Location**: `.bugit/archived/` (planned)
+- **Content**: Issue + resolution field
+- **Use**: Organize completed work
+
 ## Contributing
 
 1. Follow the implementation plan in `_docs/BugIt_Implementation_Plan.md`
 2. Write tests for new functionality using pytest fixtures  
 3. Ensure code quality with black, isort, and mypy
 4. All commits should pass the full test suite
-5. Maintain the security-first approach for any configuration changes
-6. **Consult `_docs/BugIt_Style_Guide.md` for color scheme and visual consistency guidelines**
-
-## Next Steps
-
-Ready for **Phase 4** implementation:
-1. **Performance Optimization**: Caching and efficient operations for large datasets
-2. **Advanced Features**: Custom sorting, archiving, and search capabilities
-3. **External Integrations**: GitHub, Notion, Linear integrations
-4. **Enhanced Windows Support**: Improved file locking implementation
-5. **Deployment**: Package for distribution and CI/CD integration
-
-The current implementation provides a complete AI-powered CLI tool with real LangGraph integration, production-quality file operations with atomic writes, cross-platform compatibility, and automation-friendly JSON output.
+5. Maintain the security-first approach for configuration changes
+6. **Consult `_docs/BugIt_Style_Guide.md` for coding standards**
 
 ## License
 
