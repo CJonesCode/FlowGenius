@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from core.errors import APIError, StorageError, ValidationError
-from mcp import tools
-from mcp.errors import MCPInvalidParamsError, MCPToolError
+from mcp_local import tools
+from mcp_local.errors import MCPToolError
 
 
 class TestCreateIssue:
@@ -271,7 +271,7 @@ class TestUpdateIssue:
         """Test invalid severity validation"""
         mock_load.return_value = {"id": "test123", "tags": []}
 
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.update_issue("test123", severity="invalid")
 
         assert "Invalid severity" in str(exc_info.value)
@@ -281,7 +281,7 @@ class TestUpdateIssue:
         """Test invalid status validation"""
         mock_load.return_value = {"id": "test123", "tags": []}
 
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.update_issue("test123", status="invalid")
 
         assert "Invalid status" in str(exc_info.value)
@@ -394,28 +394,28 @@ class TestConfig:
 
     def test_set_config_invalid_key(self):
         """Test setting invalid config key"""
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.set_config("invalid_key", "value")
 
         assert "Invalid configuration key" in str(exc_info.value)
 
     def test_set_config_invalid_retry_limit(self):
         """Test setting invalid retry limit"""
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.set_config("retry_limit", "not_a_number")
 
         assert "must be an integer" in str(exc_info.value)
 
     def test_set_config_invalid_backup_setting(self):
         """Test setting invalid backup setting"""
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.set_config("backup_on_delete", "not_a_boolean")
 
         assert "must be a boolean" in str(exc_info.value)
 
     def test_set_config_invalid_severity(self):
         """Test setting invalid default severity"""
-        with pytest.raises(MCPInvalidParamsError) as exc_info:
+        with pytest.raises(MCPToolError) as exc_info:
             tools.set_config("default_severity", "invalid")
 
         assert "must be one of" in str(exc_info.value)

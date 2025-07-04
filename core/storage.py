@@ -39,8 +39,48 @@ class ConcurrentAccessError(StorageError):
 
 def ensure_issues_directory() -> Path:
     """Ensure .bugit/issues directory exists"""
-    issues_dir = Path(".bugit/issues")
+    # Try to find the project directory by looking for key files
+    project_markers = ["cursor_mcp_config.json", "bugit.py", "requirements.txt"]
+    
+    # Start from current directory and walk up to find project root
+    current_dir = Path.cwd()
+    project_root = None
+    
+    # Check current directory first
+    for marker in project_markers:
+        if (current_dir / marker).exists():
+            project_root = current_dir
+            break
+    
+    # If not found, walk up the directory tree
+    if project_root is None:
+        for parent in current_dir.parents:
+            for marker in project_markers:
+                if (parent / marker).exists():
+                    project_root = parent
+                    break
+            if project_root:
+                break
+    
+    # If still not found, use current directory as fallback
+    if project_root is None:
+        project_root = current_dir
+        print(f"[DEBUG] Warning: Could not find project root, using current directory: {project_root}")
+    
+    # Create issues directory relative to project root
+    issues_dir = project_root / ".bugit" / "issues"
+    
+    print(f"[DEBUG] ensure_issues_directory: Project root = {project_root}")
+    print(f"[DEBUG] ensure_issues_directory: Relative path = {issues_dir.relative_to(project_root)}")
+    print(f"[DEBUG] Current working directory: {os.getcwd()}")
+    print(f"[DEBUG] Absolute target path: {issues_dir.absolute()}")
+    
     issues_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[DEBUG] Directory creation attempted")
+    print(f"[DEBUG] Directory exists after mkdir: {issues_dir.exists()}")
+    print(f"[DEBUG] Absolute directory exists: {issues_dir.absolute().exists()}")
+    print(f"[DEBUG] Directory is writable: {os.access(issues_dir, os.W_OK) if issues_dir.exists() else 'N/A'}")
+    
     return issues_dir
 
 
@@ -142,11 +182,16 @@ def atomic_write_json(file_path: Path, data: Dict) -> None:
     Atomically write JSON data to a file using write-then-rename pattern.
     This ensures the file is never in a partially written state.
     """
+    print(f"[DEBUG] atomic_write_json called for (relative): {file_path}")
+    print(f"[DEBUG] atomic_write_json called for (absolute): {file_path.absolute()}")
+    
     if not isinstance(data, dict):
         raise StorageError("Data must be a dictionary")
 
     # Ensure parent directory exists
     file_path.parent.mkdir(parents=True, exist_ok=True)
+    print(f"[DEBUG] Parent directory ensured (relative): {file_path.parent}")
+    print(f"[DEBUG] Parent directory ensured (absolute): {file_path.parent.absolute()}")
 
     # Create temporary file in the same directory for atomic rename
     temp_fd = None
@@ -154,34 +199,45 @@ def atomic_write_json(file_path: Path, data: Dict) -> None:
 
     try:
         # Create temporary file in same directory as target
+        print(f"[DEBUG] Creating temporary file in: {file_path.parent}")
         temp_fd, temp_path = tempfile.mkstemp(
             suffix=".tmp", prefix=f".{file_path.name}.", dir=file_path.parent
         )
+        print(f"[DEBUG] Temporary file created: {temp_path}")
 
         # Write JSON data to temporary file
         with os.fdopen(temp_fd, "w", encoding="utf-8") as temp_file:
+            print(f"[DEBUG] Writing JSON data to temporary file")
             json.dump(data, temp_file, indent=2, ensure_ascii=False)
             temp_file.flush()
             os.fsync(temp_file.fileno())  # Force write to disk
+            print(f"[DEBUG] JSON data written and flushed to disk")
 
         temp_fd = None  # File descriptor is now closed
 
         # Atomic rename - this is the critical atomic operation
         temp_path_obj = Path(temp_path)
+        print(f"[DEBUG] Attempting atomic rename from (relative): {temp_path_obj} to {file_path}")
+        print(f"[DEBUG] Attempting atomic rename from (absolute): {temp_path_obj.absolute()} to {file_path.absolute()}")
         temp_path_obj.replace(file_path)
+        print(f"[DEBUG] Atomic rename successful")
+        print(f"[DEBUG] Final file should be at: {file_path.absolute()}")
         temp_path = None  # Successfully renamed, don't clean up
 
     except Exception as e:
+        print(f"[DEBUG] Error in atomic_write_json: {e}")
         # Clean up on failure
         if temp_fd is not None:
             try:
                 os.close(temp_fd)
+                print(f"[DEBUG] Closed temp file descriptor")
             except:
                 pass
 
         if temp_path and os.path.exists(temp_path):
             try:
                 os.unlink(temp_path)
+                print(f"[DEBUG] Cleaned up temp file: {temp_path}")
             except:
                 pass
 
@@ -216,6 +272,8 @@ def save_issue(data: Dict) -> str:
     Save issue data to filesystem with atomic write and file locking.
     Returns the UUID of the saved issue.
     """
+    print(f"[DEBUG] save_issue called with data keys: {list(data.keys())}")
+    
     if not isinstance(data, dict):
         raise StorageError("Issue data must be a dictionary")
 
@@ -225,21 +283,43 @@ def save_issue(data: Dict) -> str:
         issue_id = str(uuid.uuid4())[:6]
         data["id"] = issue_id
 
+    print(f"[DEBUG] Issue ID: {issue_id}")
+
     # Ensure issues directory exists
     issues_dir = ensure_issues_directory()
     issue_file = issues_dir / f"{issue_id}.json"
+    
+    print(f"[DEBUG] Issues directory (relative): {issues_dir}")
+    print(f"[DEBUG] Issues directory (absolute): {issues_dir.absolute()}")
+    print(f"[DEBUG] Target file path (relative): {issue_file}")
+    print(f"[DEBUG] Target file path (absolute): {issue_file.absolute()}")
+    print(f"[DEBUG] Directory exists: {issues_dir.exists()}")
+    print(f"[DEBUG] Directory writable: {os.access(issues_dir, os.W_OK) if issues_dir.exists() else 'N/A'}")
 
     try:
         # Use file locking for concurrent access safety
+        print(f"[DEBUG] Attempting to acquire file lock for: {issue_file}")
         with file_lock(issue_file):
+            print(f"[DEBUG] File lock acquired, writing JSON data")
             atomic_write_json(issue_file, data)
+            print(f"[DEBUG] JSON data written successfully")
 
+        print(f"[DEBUG] File lock released, checking if file exists: {issue_file.exists()}")
+        print(f"[DEBUG] Absolute file exists: {issue_file.absolute().exists()}")
+        if issue_file.exists():
+            print(f"[DEBUG] File size: {issue_file.stat().st_size} bytes")
+            print(f"[DEBUG] Absolute file location: {issue_file.absolute()}")
+        else:
+            print(f"[DEBUG] File does NOT exist at: {issue_file.absolute()}")
+        
         return issue_id
 
     except (StorageError, ConcurrentAccessError):
         # Re-raise storage-related errors
+        print(f"[DEBUG] Storage or lock error occurred")
         raise
     except Exception as e:
+        print(f"[DEBUG] Unexpected error in save_issue: {e}")
         raise StorageError(f"Failed to save issue {issue_id}: {e}")
 
 

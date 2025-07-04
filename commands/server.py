@@ -44,3 +44,4 @@ def server(
     except Exception as e:
         typer.echo(f"Error starting MCP server: {e}", err=True)
         raise typer.Exit(1)
+ 

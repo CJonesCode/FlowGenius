@@ -6,7 +6,6 @@ Python SDK, which uses @tool decorators and proper protocol compliance.
 """
 
 import asyncio
-import logging
 from typing import Any, Dict, List, Optional, Union
 
 from mcp.server.fastmcp import FastMCP
@@ -21,7 +20,7 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_create_issue")
 def create_issue(description: str) -> Dict[str, Any]:
     """
     Create a new bug report from a freeform description.
@@ -50,7 +49,7 @@ def create_issue(description: str) -> Dict[str, Any]:
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_list_issues")
 def list_issues(
     tag: Optional[str] = None,
     severity: Optional[str] = None,
@@ -86,7 +85,7 @@ def list_issues(
         return [{"error": f"Unexpected error: {str(e)}"}]
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_get_issue")
 def get_issue(id_or_index: Union[str, int]) -> Dict[str, Any]:
     """
     Get a single issue by ID or index.
@@ -116,7 +115,7 @@ def get_issue(id_or_index: Union[str, int]) -> Dict[str, Any]:
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_update_issue")
 def update_issue(
     id_or_index: Union[str, int],
     title: Optional[str] = None,
@@ -244,7 +243,7 @@ def update_issue(
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_delete_issue")
 def delete_issue(id_or_index: Union[str, int]) -> Dict[str, Any]:
     """
     Delete an issue by ID or index.
@@ -290,7 +289,7 @@ def delete_issue(id_or_index: Union[str, int]) -> Dict[str, Any]:
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_get_config")
 def get_config() -> Dict[str, Any]:
     """
     Get current configuration settings.
@@ -343,7 +342,7 @@ def get_config() -> Dict[str, Any]:
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_set_config")
 def set_config(key: str, value: Any) -> Dict[str, Any]:
     """
     Set a configuration value.
@@ -414,7 +413,7 @@ def set_config(key: str, value: Any) -> Dict[str, Any]:
         return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
 
-@mcp.tool()
+@mcp.tool(name="mcp_bugit_get_storage_stats")
 def get_storage_stats() -> Dict[str, Any]:
     """
     Get storage statistics for monitoring and debugging.
@@ -431,8 +430,5 @@ def get_storage_stats() -> Dict[str, Any]:
 
 # Entry point for the server
 if __name__ == "__main__":
-    # Setup logging for debug mode
-    logging.basicConfig(level=logging.INFO)
-    
     # Run the server
     mcp.run() 

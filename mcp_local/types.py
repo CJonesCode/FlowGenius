@@ -1,84 +1,21 @@
 """
-Shared type aliases and interfaces for MCP server implementation.
+Shared type aliases and interfaces for MCP tools and business logic.
 
-This module defines the core types used throughout the MCP server,
-including JSON-RPC protocol types and BugIt-specific data structures.
+This module defines the core types used by MCP tools and the registry,
+focusing on BugIt-specific data structures and tool interfaces.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, TypedDict
 
 
-# JSON-RPC 2.0 Types
-class JSONRPCRequest(TypedDict):
-    """JSON-RPC 2.0 request structure"""
-
-    jsonrpc: Literal["2.0"]
-    method: str
-    params: Optional[Dict[str, Any]]
-    id: Optional[Union[str, int]]
-
-
-class JSONRPCResponse(TypedDict):
-    """JSON-RPC 2.0 response structure"""
-
-    jsonrpc: Literal["2.0"]
-    id: Optional[Union[str, int]]
-    result: Optional[Any]
-    error: Optional[Dict[str, Any]]
-
-
-class JSONRPCError(TypedDict):
-    """JSON-RPC 2.0 error structure"""
-
-    code: int
-    message: str
-    data: Optional[Any]
-
-
-# MCP Protocol Types
-class MCPInitializeParams(TypedDict):
-    """MCP initialize request parameters"""
-
-    protocolVersion: str
-    capabilities: Dict[str, Any]
-    clientInfo: Dict[str, Any]
-
-
-class MCPInitializeResult(TypedDict):
-    """MCP initialize response result"""
-
-    protocolVersion: str
-    capabilities: Dict[str, Any]
-    serverInfo: Dict[str, Any]
-
-
+# MCP Tool Types (used by registry)
 class MCPTool(TypedDict):
     """MCP tool definition"""
 
     name: str
     description: str
     inputSchema: Dict[str, Any]  # JSON Schema
-
-
-class MCPToolsListResult(TypedDict):
-    """MCP tools/list response result"""
-
-    tools: List[MCPTool]
-
-
-class MCPToolCallParams(TypedDict):
-    """MCP tools/call request parameters"""
-
-    name: str
-    arguments: Dict[str, Any]
-
-
-class MCPToolCallResult(TypedDict):
-    """MCP tools/call response result"""
-
-    content: List[Dict[str, Any]]
-    isError: Optional[bool]
 
 
 # BugIt-specific Types
@@ -158,15 +95,3 @@ class ConfigData(TypedDict, total=False):
 # Tool Function Types
 ToolFunction = Any  # Function that implements a tool
 ToolRegistry = Dict[str, ToolFunction]  # Registry of available tools
-
-
-# Common JSON-RPC Error Codes
-class JSONRPCErrorCode(int, Enum):
-    """Standard JSON-RPC error codes"""
-
-    PARSE_ERROR = -32700
-    INVALID_REQUEST = -32600
-    METHOD_NOT_FOUND = -32601
-    INVALID_PARAMS = -32602
-    INTERNAL_ERROR = -32603
-    SERVER_ERROR = -32000  # Range -32000 to -32099
