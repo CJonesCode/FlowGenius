@@ -3,15 +3,16 @@ LangGraph integration for processing bug descriptions into structured data.
 This module interfaces with LLM APIs to transform freeform text into JSON.
 """
 
-from typing import Dict, Any, Optional
 import json
 import re
 from datetime import datetime
+from typing import Any, Dict, Optional
 
-from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
+
 from core.config import load_config
 
 

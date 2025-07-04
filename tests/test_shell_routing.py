@@ -3,12 +3,13 @@ Tests for shell routing functionality in bugit.py.
 Tests the unified entry point that routes to shell or CLI based on arguments.
 """
 
+import signal
 import subprocess
 import sys
-import signal
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestUnifiedEntryPoint:
@@ -234,8 +235,9 @@ class TestEntryPointIntegration:
 
     def test_python_path_setup(self):
         """Test that Python path is set up correctly"""
-        from bugit import project_root
         import sys
+
+        from bugit import project_root
 
         # Project root should be in Python path
         assert str(project_root) in sys.path

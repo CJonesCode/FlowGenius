@@ -3,9 +3,10 @@ Centralized styling system for BugIt CLI.
 Provides consistent color schemes and formatting across all commands.
 """
 
+from typing import Any
+
 from rich.console import Console
 from rich.text import Text
-from typing import Any
 
 
 # BugIt Color Palette - Centralized Definition

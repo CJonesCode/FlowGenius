@@ -3,10 +3,11 @@ Tests for shell module functionality in shell.py.
 Tests the interactive shell features and command processing.
 """
 
+from unittest.mock import MagicMock, call, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, call
-from rich.text import Text
 from rich.console import Console
+from rich.text import Text
 
 
 class TestShellWelcome:
@@ -295,8 +296,9 @@ class TestShellCommandExecution:
 
     def test_run_command_restores_sys_argv(self):
         """Test that run_command restores sys.argv after execution"""
-        from shell import run_command
         import sys
+
+        from shell import run_command
 
         original_argv = sys.argv.copy()
 
@@ -367,10 +369,9 @@ class TestShellIntegration:
 
     def test_shell_uses_consistent_styling(self):
         """Test that shell uses consistent styling from core.styles"""
-        from shell import show_welcome
-
         # Import should work without errors
-        from core.styles import Colors, Styles, PanelStyles
+        from core.styles import Colors, PanelStyles, Styles
+        from shell import show_welcome
 
         with patch("shell.console") as mock_console:
             show_welcome()

@@ -4,12 +4,13 @@ Tests complete workflows across multiple components working together.
 """
 
 import json
-import subprocess
-import pytest
-import tempfile
 import os
+import subprocess
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 
 def run_cli_command(command_args, cwd=None):

@@ -7,8 +7,9 @@ Designed to support multiple AI providers in the future.
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
-from dotenv import load_dotenv, set_key, find_dotenv
+from typing import Any, Dict, Optional
+
+from dotenv import find_dotenv, load_dotenv, set_key
 
 
 class ConfigError(Exception):

@@ -4,17 +4,19 @@ API keys are saved to .env file, preferences to .bugitrc.
 Designed for future multi-provider support.
 """
 
-import typer
 import json
 import os
-from typing import Optional
 from pathlib import Path
-from core import config as config_core
-from core.styles import Colors, Styles, PanelStyles
+from typing import Optional
+
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+from core import config as config_core
+from core.styles import Colors, PanelStyles, Styles
 
 console = Console()
 

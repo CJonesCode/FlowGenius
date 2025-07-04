@@ -3,11 +3,13 @@ Console utilities for BugIt CLI with proper stream separation and color isolatio
 Implements the scriptability-first approach with stdout for data and stderr for messages.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 from typing import Any, Dict, Optional
+
 from rich.console import Console
+
 from .errors import BugItError, format_error
 
 

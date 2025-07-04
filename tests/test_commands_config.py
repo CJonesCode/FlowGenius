@@ -3,14 +3,15 @@ Comprehensive tests for commands/config.py module.
 Tests all config command functionality with proper isolation and edge case coverage.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import patch, mock_open, MagicMock
-from typer.testing import CliRunner
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
 import typer
+from typer.testing import CliRunner
 
 from commands.config import config
 from core.config import ConfigError

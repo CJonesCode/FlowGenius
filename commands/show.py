@@ -3,13 +3,15 @@ Show command for displaying individual bug reports.
 Supports both UUID and index-based selection.
 """
 
-import typer
 import json
-from core import storage
-from core.styles import Styles, Colors, PanelStyles
+
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+
+from core import storage
+from core.styles import Colors, PanelStyles, Styles
 
 
 def show(

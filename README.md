@@ -1,6 +1,6 @@
 # BugIt CLI
 
-**Status: Production Ready ✅** - AI-powered bug report management with unified CLI and comprehensive automation features.
+**Status: Production Ready ✅** - AI-powered bug report management with unified CLI, comprehensive automation features, and MCP server integration.
 
 ## Table of Contents
 
@@ -24,6 +24,7 @@ BugIt is a CLI-first tool that enables developers to quickly capture unstructure
 - **LangGraph Framework**: Real OpenAI API integration with GPT-4 processing
 - **Structured Output**: Pydantic validation with retry logic
 - **Multi-provider Ready**: Architecture supports Anthropic/Google (planned)
+- **MCP Server**: Cross-platform Model Context Protocol server for AI models and IDEs
 
 ### 🛠️ CLI Scriptability
 - **JSON by Default**: Perfect for automation and CI/CD pipelines
@@ -52,6 +53,7 @@ BugIt is a CLI-first tool that enables developers to quickly capture unstructure
 | `edit` | Modify existing issues | `bugit edit 1 --add-tag urgent` |
 | `delete` | Remove issues (with backup) | `bugit delete 1 --force` |
 | `config` | Manage configuration | `bugit config --set-api-key openai <key>` |
+| `server` | Start MCP server | `bugit server --debug` |
 
 ## Interface Options
 
@@ -76,6 +78,18 @@ BugIt> exit
 python cli.py new "Critical bug"
 python cli.py list --severity critical | jq '.[] | .id'
 ```
+
+### 3. **MCP Server Mode** (AI Integration)
+```bash
+# Start MCP server for AI model integration
+python -m mcp --debug
+python cli.py server --debug
+
+# AI models can then call BugIt tools via JSON-RPC 2.0
+# Available tools: create_issue, list_issues, get_issue, update_issue, delete_issue, get_config, set_config, get_storage_stats
+```
+
+**📋 Cursor IDE Integration**: See [`_docs/MCP_Cursor_Integration.md`](_docs/MCP_Cursor_Integration.md) for complete setup guide.
 
 ## Quick Start
 
@@ -273,6 +287,7 @@ python bugit.py show nonexistent; echo "Exit: $?"
 - **Comprehensive Testing**: 447 tests with 91% coverage
 - **Interactive Shell**: Human-optimized with beautiful output
 - **Configuration System**: Secure API key storage, user preferences
+- **MCP Server**: Model Context Protocol server with 8 tools and 46 comprehensive tests
 
 ### 🔄 **Planned Features**
 - **Archive Functionality**: `bugit archive` command with solution tracking

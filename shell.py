@@ -5,20 +5,21 @@ Interactive command-line interface for BugIt bug report management.
 This is a pure wrapper that calls CLI commands internally with shell-friendly defaults.
 """
 
-import sys
 import shlex
+import sys
 from pathlib import Path
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from cli import app
 import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-from core.styles import Colors, Styles, PanelStyles
+
+from cli import app
+from core.styles import Colors, PanelStyles, Styles
 
 console = Console()
 

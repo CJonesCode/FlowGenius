@@ -2,9 +2,10 @@
 Final coverage tests - targeting the remaining edge cases for maximum coverage.
 """
 
-import pytest
 import json
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
+import pytest
 import typer
 
 
@@ -55,7 +56,7 @@ class TestFinalCoverage:
 
     def test_model_max_retries_exceeded_handling(self):
         """Test model retry logic when maximum retry attempts are exceeded"""
-        from core.model import handle_retry_logic, ProcessingState, ModelError
+        from core.model import ModelError, ProcessingState, handle_retry_logic
 
         # Create exact state that triggers max retries exceeded condition
         state = ProcessingState(

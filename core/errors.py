@@ -3,9 +3,9 @@ Error handling and exit codes for BugIt CLI.
 Implements standard POSIX exit codes and structured error responses.
 """
 
-from typing import Optional
 import sys
 from enum import IntEnum
+from typing import Optional
 
 
 class ExitCode(IntEnum):

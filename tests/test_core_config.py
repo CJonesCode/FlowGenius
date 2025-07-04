@@ -3,26 +3,19 @@ Comprehensive tests for core/config.py module.
 Tests all configuration functions with proper isolation and edge case coverage.
 """
 
-import pytest
-import tempfile
-import shutil
 import json
 import os
+import shutil
+import tempfile
 from pathlib import Path
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
 
 from core import config
-from core.config import (
-    load_config,
-    save_preferences,
-    set_api_key,
-    get_config_value,
-    set_preference,
-    check_openai_api_key,
-    check_api_key,
-    set_config_value,
-    ConfigError,
-)
+from core.config import (ConfigError, check_api_key, check_openai_api_key,
+                         get_config_value, load_config, save_preferences,
+                         set_api_key, set_config_value, set_preference)
 
 
 class TestLoadConfig:

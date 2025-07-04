@@ -3,13 +3,15 @@ Comprehensive unit tests for commands/delete.py
 Tests all branches and functionality for high code coverage.
 """
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 from typer.testing import CliRunner
+
 from cli import app
-from core.storage import StorageError
 from core.schema import validate_or_default
+from core.storage import StorageError
 
 
 class TestDeleteCommand:
@@ -402,8 +404,9 @@ class TestDeleteCommand:
 
     def test_delete_unexpected_exception_json_mode(self, temp_dir, mock_config):
         """Test delete command with unexpected exception in JSON mode"""
-        from commands.delete import delete
         import typer
+
+        from commands.delete import delete
 
         # Create a test that will definitely hit the general exception handler
         # This tests the final exception handling path when pretty_output=False

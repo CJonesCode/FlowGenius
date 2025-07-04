@@ -3,14 +3,16 @@ Edit command for modifying bug reports.
 Supports field-specific updates and validation.
 """
 
-import typer
 import json
 from typing import Optional
-from core import storage, schema
-from core.styles import Colors, Styles, PanelStyles
+
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+
+from core import schema, storage
+from core.styles import Colors, PanelStyles, Styles
 
 console = Console()
 

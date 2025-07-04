@@ -3,13 +3,15 @@ Delete command for removing bug reports.
 Supports both UUID and index-based selection with confirmation.
 """
 
-import typer
 import json
-from core import storage
-from core.styles import Colors, Styles, PanelStyles
+
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+
+from core import storage
+from core.styles import Colors, PanelStyles, Styles
 
 console = Console()
 

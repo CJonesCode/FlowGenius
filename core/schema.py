@@ -3,9 +3,10 @@ Schema validation and data transformation for BugIt issues.
 Ensures all data conforms to the expected structure with proper defaults.
 """
 
-from typing import Dict, List, Any
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
+
 from .errors import ValidationError
 
 VALID_SEVERITIES = ["low", "medium", "high", "critical"]

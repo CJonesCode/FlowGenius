@@ -3,10 +3,12 @@ Comprehensive unit tests for commands/show.py
 Tests all branches and functionality for high code coverage.
 """
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 from typer.testing import CliRunner
+
 from cli import app
 from core.storage import StorageError
 
@@ -243,8 +245,9 @@ class TestShowCommand:
 
     def test_show_unexpected_exception_json_mode(self, temp_dir, mock_config):
         """Test show command with unexpected exception in JSON mode"""
-        from commands.show import show
         import typer
+
+        from commands.show import show
 
         # Create a test that will definitely hit the general exception handler
         # This tests the final exception handling path when pretty_output=False
@@ -441,8 +444,9 @@ class TestShowCommand:
 
     def test_show_general_exception_json_mode(self, temp_dir, mock_config):
         """Test show command with general exception in JSON mode to hit line 107"""
-        from commands.show import show
         import typer
+
+        from commands.show import show
 
         # Create a test that will definitely hit line 107
         # Line 107 is: raise typer.Exit(1)

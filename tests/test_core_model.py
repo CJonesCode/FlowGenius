@@ -3,26 +3,19 @@ Comprehensive tests for core/model.py module.
 Tests all LangGraph integration functions with proper mocking and error handling.
 """
 
-import pytest
-import os
-from unittest.mock import Mock, patch, MagicMock
 import json
-from typing import Dict, Any
+import os
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from core import model
-from core.model import (
-    create_llm_chain,
-    analyze_bug_description,
-    validate_and_clean_result,
-    handle_retry_logic,
-    should_retry,
-    create_processing_graph,
-    process_description,
-    setup_langgraph,
-    test_model_connection,
-    ProcessingState,
-    ModelError,
-)
+from core.model import (ModelError, ProcessingState, analyze_bug_description,
+                        create_llm_chain, create_processing_graph,
+                        handle_retry_logic, process_description,
+                        setup_langgraph, should_retry, test_model_connection,
+                        validate_and_clean_result)
 
 
 class TestProcessingState:
@@ -243,7 +236,7 @@ class TestRetryLogic:
 
     def test_handle_retry_logic_exceeds_max_retries(self):
         """Test handle_retry_logic when retry attempts exceed maximum allowed"""
-        from core.model import handle_retry_logic, ProcessingState, ModelError
+        from core.model import ModelError, ProcessingState, handle_retry_logic
 
         # Create a state that has EXACTLY reached max retries (not exceeded)
         # This triggers the max retries exceeded condition

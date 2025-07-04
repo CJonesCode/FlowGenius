@@ -3,34 +3,27 @@ Comprehensive tests for core/storage.py module.
 Tests all storage functions with proper isolation and edge case coverage.
 """
 
-import pytest
-import tempfile
-import shutil
 import json
-import sys
-from pathlib import Path
-from unittest.mock import patch, mock_open
 import os
 import platform
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import mock_open, patch
+
+import pytest
 
 # Import for Windows file locking constants
 if sys.platform.startswith("win"):
     import msvcrt
 
 from core import storage
-from core.storage import (
-    ensure_issues_directory,
-    atomic_write_json,
-    read_json_file,
-    save_issue,
-    load_issue,
-    list_issues,
-    delete_issue,
-    get_issue_by_index,
-    get_storage_stats,
-    StorageError,
-    ConcurrentAccessError,
-)
+from core.storage import (ConcurrentAccessError, StorageError,
+                          atomic_write_json, delete_issue,
+                          ensure_issues_directory, get_issue_by_index,
+                          get_storage_stats, list_issues, load_issue,
+                          read_json_file, save_issue)
 
 
 class TestEnsureIssuesDirectory:

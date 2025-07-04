@@ -3,12 +3,14 @@ List command for displaying bug reports.
 Shows issues in a formatted table with filtering options.
 """
 
-import typer
 from typing import Optional
-from core import storage
-from core.styles import Styles, TableStyles
+
+import typer
 from rich.console import Console
 from rich.table import Table
+
+from core import storage
+from core.styles import Styles, TableStyles
 
 
 def list_issues(

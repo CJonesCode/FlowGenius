@@ -7,8 +7,9 @@ Provides commands for creating, listing, showing, editing, and deleting bug repo
 """
 
 import typer
-from commands import new, list, show, delete, edit
+
 from commands import config as config_cmd
+from commands import delete, edit, list, new, server, show
 
 # Version information
 __version__ = "1.0.0"
@@ -102,6 +103,10 @@ app.command("delete", help="Delete a bug report permanently")(delete.delete)
 app.command("edit", help="Edit an existing bug report")(edit.edit)
 
 app.command("config", help="View or modify BugIt configuration")(config_cmd.config)
+
+app.command("server", help="Start the BugIt MCP server for AI model integration")(
+    server.server
+)
 
 if __name__ == "__main__":
     app()

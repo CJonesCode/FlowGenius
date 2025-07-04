@@ -3,9 +3,10 @@ Comprehensive tests for core/styles.py module.
 Tests all formatting and styling functions with various input types.
 """
 
-import pytest
 from datetime import datetime
 from typing import Any
+
+import pytest
 
 from core import styles
 from core.styles import Colors, Styles, TableStyles

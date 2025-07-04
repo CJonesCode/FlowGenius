@@ -3,10 +3,12 @@ Comprehensive tests for core/schema.py module.
 Tests all validation functions with edge cases and data transformation.
 """
 
-import pytest
 from datetime import datetime
+
+import pytest
+
 from core import schema
-from core.schema import validate_or_default, validate_config, ValidationError
+from core.schema import ValidationError, validate_config, validate_or_default
 
 
 class TestValidateOrDefault:

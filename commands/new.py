@@ -4,13 +4,15 @@ Processes freeform descriptions using LangGraph and saves structured issues.
 """
 
 import typer
-from core import model, storage, schema
-from core.console import output_json, output_message, output_error, output_success
-from core.errors import BugItError, APIError, StorageError, ExitCode
-from core.styles import Styles, Colors, PanelStyles
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+
+from core import model, schema, storage
+from core.console import (output_error, output_json, output_message,
+                          output_success)
+from core.errors import APIError, BugItError, ExitCode, StorageError
+from core.styles import Colors, PanelStyles, Styles
 
 
 def new(

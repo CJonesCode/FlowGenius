@@ -3,12 +3,14 @@ Performance tests for BugIt CLI.
 Tests system behavior under load and measures performance characteristics.
 """
 
-import pytest
-import time
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from unittest.mock import patch, MagicMock
-from core import storage, model, schema
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from core import model, schema, storage
 
 
 @pytest.mark.performance
@@ -96,8 +98,9 @@ class TestStoragePerformance:
 
     def test_memory_usage_with_large_dataset(self, temp_dir, issue_factory):
         """Test memory usage doesn't grow excessively with large datasets"""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB

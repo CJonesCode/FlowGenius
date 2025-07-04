@@ -3,15 +3,16 @@ Pytest configuration and shared fixtures for BugIt tests.
 Provides test isolation, mock data, and common test utilities following industry standards.
 """
 
-import pytest
-import tempfile
-import shutil
-from pathlib import Path
-import os
-from unittest.mock import patch, MagicMock, AsyncMock
 import json
-from typing import Dict, Any, List, Optional
+import os
+import shutil
+import tempfile
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @pytest.fixture

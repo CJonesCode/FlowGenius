@@ -3,13 +3,15 @@ Contract tests for BugIt CLI.
 Ensures API schemas, CLI interfaces, and file formats maintain backward compatibility.
 """
 
-import pytest
 import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import patch
+
+import pytest
+
 from core import schema, storage
 
 
@@ -415,8 +417,8 @@ class TestErrorContractConsistency:
     def test_error_message_format_contract(self):
         """Test that error messages follow consistent format"""
         # Contract: All custom exceptions should have meaningful messages
-        from core.schema import ValidationError
         from core.model import ModelError
+        from core.schema import ValidationError
         from core.storage import StorageError
 
         test_errors = [

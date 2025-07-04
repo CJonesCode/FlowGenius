@@ -9,9 +9,11 @@ For comprehensive module testing, see the module-specific test files:
 - test_commands_*.py (CLI command functionality)
 """
 
-import pytest
 from unittest.mock import patch
-from core import storage, schema, model, config
+
+import pytest
+
+from core import config, model, schema, storage
 
 
 @pytest.mark.unit
@@ -100,7 +102,7 @@ class TestImportStructure:
 
     def test_core_modules_import(self):
         """Test that all core modules can be imported without errors"""
-        from core import storage, schema, model, config, styles
+        from core import config, model, schema, storage, styles
 
         # Verify key functions exist
         assert hasattr(storage, "save_issue")
@@ -113,7 +115,7 @@ class TestImportStructure:
 
     def test_command_modules_import(self):
         """Test that all command modules can be imported without errors"""
-        from commands import new, list, show, edit, delete, config
+        from commands import config, delete, edit, list, new, show
 
         # Verify main functions exist
         assert hasattr(new, "new")
