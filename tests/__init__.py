@@ -1,1 +1,1 @@
-# Tests package for BugIt CLI 
+# Tests package for BugIt CLI

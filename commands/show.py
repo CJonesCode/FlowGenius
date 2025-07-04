@@ -14,15 +14,17 @@ from rich.text import Text
 
 def show(
     id_or_index: str,
-    pretty_output: bool = typer.Option(False, "-p", "--pretty", help="Output in human-readable format")
+    pretty_output: bool = typer.Option(
+        False, "-p", "--pretty", help="Output in human-readable format"
+    ),
 ):
     """
     Show detailed information about a specific bug report.
-    
+
     Args:
         id_or_index: Either the UUID or index (from list command) of the issue
         pretty_output: Show human-readable output instead of JSON
-    
+
     Default output is JSON for easy scripting and automation.
     Use --pretty for human-readable output with syntax highlighting.
     """
@@ -34,60 +36,85 @@ def show(
         else:
             # UUID-based selection
             issue = storage.load_issue(id_or_index)
-        
+
         # Display issue details
         if pretty_output:
             # Human-readable output with Rich formatting and consistent styling
             console = Console()
-            
+
             # Create a nice panel with issue details using centralized styles
             title_text = Text()
-            title_text.append(issue.get('title', 'No title'), style=Colors.PRIMARY)
+            title_text.append(issue.get("title", "No title"), style=Colors.PRIMARY)
             title_text.append(" (ID: ", style=Colors.SECONDARY)
-            title_text.append(issue.get('id', 'N/A'), style=Colors.IDENTIFIER)
+            title_text.append(issue.get("id", "N/A"), style=Colors.IDENTIFIER)
             title_text.append(")", style=Colors.SECONDARY)
-            
+
             content = Text()
-            
+
             # Severity with dynamic coloring
             content.append("Severity: ", style=Colors.SECONDARY)
-            severity_value = issue.get('severity', 'N/A')
-            content.append(severity_value, style=Styles.get_severity_color(severity_value))
+            severity_value = issue.get("severity", "N/A")
+            content.append(
+                severity_value, style=Styles.get_severity_color(severity_value)
+            )
             content.append("\n")
-            
+
             # Type
             content.append("Type: ", style=Colors.SECONDARY)
-            content.append(issue.get('type', 'N/A'), style=Colors.PRIMARY)
+            content.append(issue.get("type", "N/A"), style=Colors.PRIMARY)
             content.append("\n")
-            
+
+            # Status
+            content.append("Status: ", style=Colors.SECONDARY)
+            content.append(issue.get("status", "N/A"), style=Colors.PRIMARY)
+            content.append("\n")
+
             # Tags
             content.append("Tags: ", style=Colors.SECONDARY)
-            tags = issue.get('tags', [])
+            tags = issue.get("tags", [])
             if tags:
-                content.append(', '.join(tags), style=Colors.WARNING)
+                content.append(", ".join(tags), style=Colors.WARNING)
             else:
                 content.append("(none)", style=Colors.SECONDARY)
             content.append("\n")
-            
+
+            # Solution (if any)
+            solution = issue.get("solution", "")
+            if solution:
+                content.append("Solution: ", style=Colors.SECONDARY)
+                content.append(solution, style=Colors.SUCCESS)
+                content.append("\n")
+
             # Created date
             content.append("Created: ", style=Colors.SECONDARY)
-            content.append(issue.get('created_at', 'N/A'), style=Colors.SUCCESS)
+            content.append(issue.get("created_at", "N/A"), style=Colors.SUCCESS)
+            content.append("\n")
+
+            # Updated date (if different from created)
+            updated_at = issue.get("updated_at", "")
+            created_at = issue.get("created_at", "")
+            if updated_at and updated_at != created_at:
+                content.append("Updated: ", style=Colors.SECONDARY)
+                content.append(updated_at, style=Colors.SUCCESS)
+                content.append("\n")
+
+            # Schema version (for debugging/technical info)
+            content.append("Schema: ", style=Colors.SECONDARY)
+            content.append(issue.get("schema_version", "N/A"), style=Colors.SECONDARY)
             content.append("\n\n")
-            
+
             # Description
             content.append("Description:\n", style=Colors.SECONDARY)
-            content.append(issue.get('description', 'No description'), style=Colors.PRIMARY)
-            
-            panel = Panel(
-                content,
-                title=title_text,
-                **PanelStyles.standard()
+            content.append(
+                issue.get("description", "No description"), style=Colors.PRIMARY
             )
+
+            panel = Panel(content, title=title_text, **PanelStyles.standard())
             console.print(panel)
         else:
             # JSON output (default)
             typer.echo(json.dumps(issue, indent=2))
-        
+
     except storage.StorageError as e:
         # Handle storage-specific errors
         error_msg = str(e)
@@ -95,10 +122,7 @@ def show(
             console = Console()
             console.print(Styles.error(f"Error: {error_msg}"))
         else:
-            output = {
-                "success": False,
-                "error": error_msg
-            }
+            output = {"success": False, "error": error_msg}
             typer.echo(json.dumps(output, indent=2))
         raise typer.Exit(1)
     except typer.Exit:
@@ -110,9 +134,6 @@ def show(
             console = Console()
             console.print(Styles.error(error_msg))
         else:
-            output = {
-                "success": False,
-                "error": error_msg
-            }
+            output = {"success": False, "error": error_msg}
             typer.echo(json.dumps(output, indent=2))
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

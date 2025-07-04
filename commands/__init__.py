@@ -1,1 +1,1 @@
-# Commands package for BugIt CLI 
+# Commands package for BugIt CLI

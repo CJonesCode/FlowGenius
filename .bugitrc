@@ -3,5 +3,6 @@
   "enum_mode": "auto",
   "output_format": "table",
   "retry_limit": 3,
-  "default_severity": "medium"
+  "default_severity": "medium",
+  "backup_on_delete": true
 }

@@ -7,50 +7,52 @@ from rich.console import Console
 from rich.text import Text
 from typing import Any
 
+
 # BugIt Color Palette - Centralized Definition
 class Colors:
     """Centralized color definitions for consistent styling"""
-    
+
     # Core palette from style guide
-    BRAND = "blue"           # Brand identity, prompts, borders
-    INTERACTIVE = "cyan"     # Interactive elements, commands, indices
-    ERROR = "red"           # Errors, critical severity
-    SUCCESS = "green"       # Success, dates, confirmations
-    WARNING = "yellow"      # Tags, warnings, medium severity
+    BRAND = "blue"  # Brand identity, prompts, borders
+    INTERACTIVE = "cyan"  # Interactive elements, commands, indices
+    ERROR = "red"  # Errors, critical severity
+    SUCCESS = "green"  # Success, dates, confirmations
+    WARNING = "yellow"  # Tags, warnings, medium severity
     IDENTIFIER = "magenta"  # UUIDs, identifiers
-    PRIMARY = "white"       # Primary content, titles
-    SECONDARY = "dim"       # Secondary text, descriptions
-    
+    PRIMARY = "white"  # Primary content, titles
+    SECONDARY = "dim"  # Secondary text, descriptions
+
     # Severity-specific colors
     CRITICAL = "red"
     HIGH = "red"
-    MEDIUM = "yellow" 
+    MEDIUM = "yellow"
     LOW = "dim"
+
 
 class Styles:
     """Semantic styling functions for consistent formatting"""
-    
+
     @staticmethod
     def uuid(value: Any) -> str:
         """Format UUID with consistent styling"""
         return f"[{Colors.IDENTIFIER}]{value}[/{Colors.IDENTIFIER}]"
-    
+
     @staticmethod
     def index(value: Any) -> str:
         """Format index with consistent styling"""
         return f"[{Colors.INTERACTIVE}]{value}[/{Colors.INTERACTIVE}]"
-    
+
     @staticmethod
     def date(value: Any) -> str:
         """Format date with consistent styling"""
         return f"[{Colors.SUCCESS}]{value}[/{Colors.SUCCESS}]"
-    
+
     @staticmethod
     def severity(value: Any) -> str:
         """Format severity with appropriate color"""
         if not value:
             return f"[{Colors.SECONDARY}]N/A[/{Colors.SECONDARY}]"
-        
+
         value_lower = str(value).lower()
         if value_lower == "critical":
             color = Colors.CRITICAL
@@ -62,15 +64,15 @@ class Styles:
             color = Colors.LOW
         else:
             color = Colors.SECONDARY
-            
+
         return f"[{color}]{value}[/{color}]"
-    
+
     @staticmethod
     def get_severity_color(value: Any) -> str:
         """Get just the color name for severity (without Rich markup)"""
         if not value:
             return Colors.SECONDARY
-        
+
         value_lower = str(value).lower()
         if value_lower == "critical":
             return Colors.CRITICAL
@@ -82,97 +84,92 @@ class Styles:
             return Colors.LOW
         else:
             return Colors.SECONDARY
-    
+
     @staticmethod
     def tags(value: Any) -> str:
         """Format tags with consistent styling"""
         return f"[{Colors.WARNING}]{value}[/{Colors.WARNING}]"
-    
+
     @staticmethod
     def title(value: Any) -> str:
         """Format title with consistent styling"""
         return f"[{Colors.PRIMARY}]{value}[/{Colors.PRIMARY}]"
-    
+
     @staticmethod
     def description(value: Any) -> str:
         """Format description with consistent styling"""
         return f"[{Colors.SECONDARY}]{value}[/{Colors.SECONDARY}]"
-    
+
     @staticmethod
     def brand(value: Any) -> str:
         """Format brand/prompt text with consistent styling"""
         return f"[{Colors.BRAND}]{value}[/{Colors.BRAND}]"
-    
+
     @staticmethod
     def success(value: Any) -> str:
         """Format success messages with consistent styling"""
         return f"[{Colors.SUCCESS}]{value}[/{Colors.SUCCESS}]"
-    
+
     @staticmethod
     def error(value: Any) -> str:
         """Format error messages with consistent styling"""
         return f"[{Colors.ERROR}]{value}[/{Colors.ERROR}]"
-    
+
     @staticmethod
     def warning(value: Any) -> str:
         """Format warning messages with consistent styling"""
         return f"[{Colors.WARNING}]{value}[/{Colors.WARNING}]"
 
+
 # Table styling configurations
 class TableStyles:
     """Predefined table styling configurations"""
-    
+
     @staticmethod
     def issue_list():
         """Standard issue list table column styles"""
         return {
             "Index": Colors.INTERACTIVE,
-            "UUID": Colors.IDENTIFIER, 
+            "UUID": Colors.IDENTIFIER,
             "Date": Colors.SUCCESS,
             "Severity": None,  # Will be handled by Styles.severity()
             "Tags": Colors.WARNING,
-            "Title": Colors.PRIMARY
+            "Title": Colors.PRIMARY,
         }
+
 
 # Panel styling configurations
 class PanelStyles:
     """Centralized panel styling configurations"""
-    
+
     @staticmethod
     def standard():
         """Standard panel styling for all BugIt panels"""
-        return {
-            "title_align": "left",
-            "border_style": Colors.BRAND,
-            "padding": (1, 2)
-        }
-    
+        return {"title_align": "left", "border_style": Colors.BRAND, "padding": (1, 2)}
+
     @staticmethod
     def success():
         """Success panel styling (e.g., completion messages)"""
         return {
             "title_align": "left",
             "border_style": Colors.SUCCESS,
-            "padding": (1, 2)
+            "padding": (1, 2),
         }
-    
+
     @staticmethod
     def error():
         """Error panel styling (e.g., error messages)"""
-        return {
-            "title_align": "left",
-            "border_style": Colors.ERROR,
-            "padding": (1, 2)
-        }
-    
+        return {"title_align": "left", "border_style": Colors.ERROR, "padding": (1, 2)}
+
     @staticmethod
     def warning():
         """Warning panel styling (e.g., deletion confirmations)"""
         return {
             "title_align": "left",
             "border_style": Colors.WARNING,
-            "padding": (1, 2)
+            "padding": (1, 2),
         }
 
+
 # Export commonly used items
-__all__ = ['Colors', 'Styles', 'TableStyles', 'PanelStyles'] 
+__all__ = ["Colors", "Styles", "TableStyles", "PanelStyles"]

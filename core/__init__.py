@@ -1,1 +1,1 @@
-# Core package for BugIt CLI 
+# Core package for BugIt CLI
